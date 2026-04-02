@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 file = uproot.open("run6A.root")
-tree = file["your_tree_name"]
+tree = file["et_spectrum"]
 
 data = tree["energy"].array()
 time = tree["time"].array()
