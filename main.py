@@ -3,7 +3,11 @@ import matplotlib.pyplot as plt
 
 # 参数
 N = 50000
-tau = 49.2e-6  # muon lifetime in seconds
+t=2.2e-6  # muon lifetime in seconds
+v=0.999 # muon velocity (close to speed of light)
+gamma = 1/np.sqrt(1-v**2)  # Lorentz factor
+tau = t * gamma  # dilated lifetime
+    
 omega = 2*np.pi*0.23
 A = 0.4
 phi = 0 * np.pi / 180  # convert degrees to radians
