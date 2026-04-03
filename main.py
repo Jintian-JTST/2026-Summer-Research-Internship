@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 
 # 参数
 N = 50000
-tau = 2.2
+tau = 49.2e-6  # muon lifetime in seconds
 omega = 2*np.pi*0.23
 A = 0.4
-phi = 0
+phi = 0 * np.pi / 180  # convert degrees to radians
 
 times = []
 
