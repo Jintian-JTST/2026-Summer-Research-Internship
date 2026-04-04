@@ -5,8 +5,8 @@ M_MU = 105.658     # 缪子质量 MeV/c^2
 M_E = 0.511       # 电子质量 MeV/c^2
 E_MAX = (M_MU**2 + M_E**2) / (2 * M_MU) # 静止系下正电子获得最大能量 MeV
 
-BETA = 0.999      # 缪子速度 
-GAMMA = 1/np.sqrt(1-BETA**2) # 洛伦兹因子
+GAMMA = 29.3 # 洛伦兹因子
+BETA = np.sqrt(1 - 1/GAMMA**2) # 根据 GAMMA 计算 BETA，确保物理一致性
 TAU_REST = 2.2e-6    # 静止寿命 s
 TAU_LAB = GAMMA * TAU_REST # 实验室寿命 s
 
