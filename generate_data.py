@@ -22,8 +22,8 @@ def run_g2_toy_mc(n_events):
     phi_e = np.zeros(n_events)
     
     # 建立一个掩码，True 表示该位置的粒子还没有成功生成
-    pending_mask = np.ones(n_events, dtype=bool)
-    M_max = 1.0 + P_MU
+    pending_mask = np.ones(n_events, dtype=bool)# 初始化为全 True，表示所有事件都需要生成
+    M_max = 1.0 + P_MU # PDF 的最大值，确保 y_rand 的范围足够覆盖 PDF 的所有可能值
 
     # 3. 舍选法循环，严格保证 t_lab 和生成变量的一一对应
     while np.any(pending_mask):
@@ -84,9 +84,7 @@ def run_g2_toy_mc(n_events):
 
 t, x, y, z, E, px, py, pz = run_g2_toy_mc(N_EVENTS)
 
-# ==========================================
 #  整理输出数据 (满足 "数据包括四动量、时间和位置" 的要求)
-# ==========================================
 
 detector_data = pd.DataFrame({
     'Time_us': t,

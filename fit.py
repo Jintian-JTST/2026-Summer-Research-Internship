@@ -4,7 +4,7 @@ import uproot
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-from constants import TAU_LAB, OMEGA_A, THRESHOLD
+from constants import TAU_LAB, OMEGA_A, THRESHOLD, TIME_MAX
 
 # --- 1. 读取数据 ---
 try:
@@ -19,7 +19,7 @@ counts = data['Counts']
 # --- 3. 选择拟合的时间范围 ---
 # 我们使用这两个变量既做拟合范围，也做画图的 xlim
 time_min = 0   # us, 避开早期的束流噪声
-time_max = 100  # us, 避开后期统计量太低的区域
+time_max = TIME_MAX  # us, 避开后期统计量太低的区域
 time_centers = data['Time_us'] # 直接使用 CSV 中的时间数据，确保与 counts 完全对应
 fit_mask = (data['Time_us'] >= time_min) & (data['Time_us'] <= time_max)
 time_fit = data['Time_us'][fit_mask]
@@ -80,7 +80,7 @@ print("--------------------")
 
 # --- 6. 画 wiggle plot (根据你提供的代码风格) ---
 plt.figure(figsize=(12, 6))
-plt.plot(time_centers, counts, lw=1, color='blue', alpha=0.5, label="Data")
+plt.plot(time_centers, counts, lw=1, color='blue', label="Data")
 plot_time = np.linspace(time_min, time_max, 1000)
 fit_curve = wiggle_fit_function(plot_time, *popt)
 plt.plot(plot_time, fit_curve, 'r-', linewidth=2, label="Fit")
