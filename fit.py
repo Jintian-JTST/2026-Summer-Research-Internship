@@ -1,45 +1,28 @@
 # fit.py
-
 import os
 import uproot
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-from constants import TAU_LAB, OMEGA_A
+from constants import TAU_LAB, OMEGA_A, THRESHOLD
 
-
-TAU_LAB = TAU_LAB * 1e6  # 转换为微秒
-OMEGA_A = OMEGA_A * 1e-6  # 转换为 rad/微秒
-# --- 1. 读取 ROOT 文件数据 ---
+# --- 1. 读取数据 ---
 try:
-    file = uproot.open("run6A.root")
-    hist = file["et_spectrum"]
-    values = hist.values()
-    time_edges = hist.axis(0).edges()
-    energy_edges = hist.axis(1).edges()
+    file = open("wiggle_plot_data.csv", "r")
+    data = np.genfromtxt(file, delimiter=",", names=True)
 except FileNotFoundError:
-    print("Error: run6A.root not found. Please make sure the ROOT file is in the correct directory.")
+    print("Error: wiggle_plot_data.csv not found. Please make sure the file is in the correct directory.")
     exit()
 
-# --- 2. 设定能量阈值，提取数据 (根据你提供的代码) ---
-threshold = 1700  # MeV
-
-# 找到阈值对应的能量 bin
-energy_bin = np.searchsorted(energy_edges, threshold, side="left")
-
-# 假设第 0 轴是时间，第 1 轴是能量：
-counts = values[:, energy_bin:].sum(axis=1)
-
-# 时间 bin 中心
-time_centers = 0.5 * (time_edges[:-1] + time_edges[1:])
+counts = data['Counts']
 
 # --- 3. 选择拟合的时间范围 ---
 # 我们使用这两个变量既做拟合范围，也做画图的 xlim
-time_min = 30   # us, 避开早期的束流噪声
-time_max = 600  # us, 避开后期统计量太低的区域
-
-fit_mask = (time_centers >= time_min) & (time_centers <= time_max)
-time_fit = time_centers[fit_mask]
+time_min = 0   # us, 避开早期的束流噪声
+time_max = 100  # us, 避开后期统计量太低的区域
+time_centers = data['Time_us'] # 直接使用 CSV 中的时间数据，确保与 counts 完全对应
+fit_mask = (data['Time_us'] >= time_min) & (data['Time_us'] <= time_max)
+time_fit = data['Time_us'][fit_mask]
 counts_fit = counts[fit_mask]
 
 # 计算误差（泊松误差为 sqrt(N)，如果 counts 为 0 设为 1 防止除零报错）
@@ -54,16 +37,10 @@ def wiggle_fit_function(t, N, A, omega, phi_0):
     omega: Anomalous precession frequency (自由参数)
     phi_0: Initial phase
     """
-    # 这里的 TAU_LAB 从 constants.py 导入，作为固定常数
     return N * np.exp(-t / TAU_LAB) * (1 + A * np.cos(omega * t - phi_0))
 
 # --- 5. 执行拟合 ---
-# 安全检查：防止单位不匹配导致除零错误
 decay_factor = np.exp(-time_fit[0] / TAU_LAB)
-if decay_factor == 0.0:
-    print("\n[!] ERROR: Decay factor evaluated to 0.0. 可能是 TAU_LAB 的单位不对。")
-    print("请确保 constants.py 中的 TAU_LAB 单位是微秒 (大约是 64.4)。")
-    exit()
 
 # 初始参数猜测 [N, A, omega, phi_0]
 initial_N = counts_fit[0] / decay_factor
@@ -87,6 +64,7 @@ except RuntimeError as e:
     print(f"Fit failed to converge: {e}")
     exit()
 
+
 # 提取拟合参数和误差
 fit_N, fit_A, fit_omega, fit_phi_0 = popt
 perr = np.sqrt(np.diag(pcov))
@@ -99,13 +77,10 @@ print(f"omega = {fit_omega:.6f} ± {err_omega:.6f} rad/us")
 print(f"phi_0 = {fit_phi_0:.4f} ± {err_phi_0:.4f} rad")
 print("--------------------")
 
+
 # --- 6. 画 wiggle plot (根据你提供的代码风格) ---
 plt.figure(figsize=(12, 6))
-
-# 画原始数据连线
 plt.plot(time_centers, counts, lw=1, color='blue', alpha=0.5, label="Data")
-
-# 生成拟合平滑曲线并绘制
 plot_time = np.linspace(time_min, time_max, 1000)
 fit_curve = wiggle_fit_function(plot_time, *popt)
 plt.plot(plot_time, fit_curve, 'r-', linewidth=2, label="Fit")
@@ -115,7 +90,7 @@ plt.xlim(time_min, time_max)
 
 # 添加带单位的标签 (使用原始字符串 r"" 防止转义字符报错)
 plt.xlabel(r"Time ($\mu s$)") 
-plt.ylabel(f"Counts (E > {threshold} MeV)") 
+plt.ylabel(f"Counts (E > {THRESHOLD} MeV)") 
 plt.title(f"Wiggle Plot and Fit (Zoomed: {time_min}-{time_max} $\mu s$)")
 plt.yscale("log") 
 plt.grid(True, which="both", ls="--", alpha=0.5)
@@ -135,7 +110,7 @@ plt.tight_layout()
 
 # 保存图片
 os.makedirs("plot", exist_ok=True)
-plt.savefig("plot/wiggle_plot_run6A_fit.png", dpi=300, bbox_inches='tight') 
-print("Fit plot saved to plot/wiggle_plot_run6A_fit.png")
+plt.savefig("plot/real_wiggle_plot_run6A_fit.png", dpi=300, bbox_inches='tight') 
+print("Fit plot saved to plot/real_wiggle_plot_run6A_fit.png")
 
 plt.show()

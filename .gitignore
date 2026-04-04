@@ -2,3 +2,16 @@
 gha-creds-*.json
 __pycache__/
 test files/
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# virtual env
+.venv/
+venv/
+
+# data / outputs
+*.csv
+plot/
