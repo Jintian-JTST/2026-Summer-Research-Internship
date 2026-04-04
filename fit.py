@@ -110,7 +110,7 @@ plt.tight_layout()
 
 # 保存图片
 os.makedirs("plot", exist_ok=True)
-plt.savefig("plot/real_wiggle_plot_run6A_fit.png", dpi=300, bbox_inches='tight') 
-print("Fit plot saved to plot/real_wiggle_plot_run6A_fit.png")
+plt.savefig("plot/wiggle_plot_run6A_fit.png", dpi=300, bbox_inches='tight') 
+print("Fit plot saved to plot/wiggle_plot_run6A_fit.png")
 
 plt.show()

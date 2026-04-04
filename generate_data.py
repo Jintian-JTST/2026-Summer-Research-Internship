@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd # 用于生成结构化的“探测器数据”表
 from constants import *
+import sys # For custom progress bar
 
 print("Data generation in progress...")
 def run_g2_toy_mc(n_events):
@@ -26,7 +27,7 @@ def run_g2_toy_mc(n_events):
     M_max = 1.0 + P_MU # PDF 的最大值，确保 y_rand 的范围足够覆盖 PDF 的所有可能值
 
     # 3. 舍选法循环，严格保证 t_lab 和生成变量的一一对应
-    progress = 0.0
+    #progress = 0.0
     while np.any(pending_mask):
         n_pending = np.sum(pending_mask) # 还需要生成多少个
         
@@ -60,9 +61,17 @@ def run_g2_toy_mc(n_events):
         # 更新掩码，把成功生成的标记为 False
         pending_mask[accepted_indices] = False
 
-        if 100 * (1 - np.sum(pending_mask) / n_events) > progress + 5: # 每完成 1% 就更新一次进度显示
-            progress = 100 * (1 - np.sum(pending_mask) / n_events)
-            print(f"Progress: {progress:.1f}%")
+
+        # 更新进度条
+        completed_events = n_events - np.sum(pending_mask)
+        progress_percent = (completed_events / n_events) * 100
+        
+        bar_length = 50
+        filled_length = int(bar_length * progress_percent // 100)
+        bar = '#' * filled_length + '-' * (bar_length - filled_length)
+        
+        sys.stdout.write(f'\rGenerating data: |{bar}| {progress_percent:.1f}% ({completed_events}/{n_events})')
+        sys.stdout.flush()
 
     # 4. 计算静止系下的四动量
     E_rest = x_e * E_MAX
@@ -103,20 +112,22 @@ def run_g2_toy_mc(n_events):
  #py, 
  #pz
  ) = run_g2_toy_mc(N_EVENTS)
-print("Data generation finished. Preparing output...")
+print("\nData generation finished. Preparing output...")
 #  整理输出数据 (满足 "数据包括四动量、时间和位置" 的要求)
 
 detector_data = pd.DataFrame({
-    'Time_us': t,
+    'Time_us': t.round(2), # 保留两位小数的时间数据，单位为微秒
     #'PosX_m': x, 'PosY_m': y,
-    'E_MeV': E,
+    'Energy_MeV': E.round(2) # 保留两位小数的能量数据，单位为 MeV,
     #'Px_MeV': px, 'Py_MeV': py, 'Pz_MeV': pz
 })
 #print("\n--- 模拟的探测器截获数据前 5 行 ---")
 #print(detector_data.head())
 
-print("Saving simulated data to Feather...")
+'''print("Saving simulated data to Feather...")
 pandas_output_path = "simulated_detector_data.feather"
 detector_data.to_feather(pandas_output_path)
 print(f"Simulated data saved to {pandas_output_path}, with {len(detector_data)} events.")
-print("Data generation completed.")
+print("Data generation completed.")'''
+
+detector_data.to_csv("simulated_detector_data.csv", index=False)
