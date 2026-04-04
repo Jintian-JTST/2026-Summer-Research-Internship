@@ -9,7 +9,7 @@ from constants import *
 # 确保图片保存目录存在
 os.makedirs('plot', exist_ok=True)
 
-detector_data = pd.read_csv('simulated_detector_data.csv')
+detector_data = pd.read_feather('simulated_detector_data.feather')
 
 high_energy_data = detector_data[
     (detector_data['E_MeV'] > THRESHOLD) &

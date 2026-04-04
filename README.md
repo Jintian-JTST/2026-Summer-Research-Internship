@@ -22,7 +22,7 @@ pip install numpy pandas matplotlib scipy uproot
 * **`generate_data.py`**
     * **功能**：核心 Toy MC 模拟器。
     * **内容**：根据指数分布生成缪子衰变时间，并通过**舍选法 (Rejection Sampling)** 根据弱相互作用宇称不守恒的概率密度函数 (PDF) 生成正电子的运动学参数。随后通过洛伦兹变换将其从缪子静止系 boost 并旋转至实验室坐标系。
-    * **输出**：将探测器截获的四动量、时间和位置数据保存为 `simulated_detector_data.csv`。
+    * **输出**：将探测器截获的四动量、时间和位置数据保存为 `simulated_detector_data.feather`。
 
 * **`plot.py`**
     * **功能**：数据预处理与可视化。
@@ -43,7 +43,7 @@ pip install numpy pandas matplotlib scipy uproot
 ```bash
 python generate_data.py
 ```
-*预期输出*：生成 `simulated_detector_data.csv` 文件。
+*预期输出*：生成 `simulated_detector_data.feather` 文件。
 
 **第二步：筛选数据与绘图**
 从生成的全量数据中提取高于能量阈值的高能正电子，生成时间分布直方图。

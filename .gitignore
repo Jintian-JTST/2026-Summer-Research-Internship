@@ -13,3 +13,4 @@ venv/
 
 # data / outputs
 *.csv
+*.feather
