@@ -3,7 +3,7 @@ This repo is used for Stage 1 in 2026 SRI for myself. It is a Monte Carlo model 
 
 
 
-
+## AI 生成，请勿阅读
 
 太棒了！首先，导师必须给你一个大大的赞！👍 
 
