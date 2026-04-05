@@ -28,8 +28,9 @@ def generation(N):
             p= np.sqrt(np.maximum(E**2 - M_E**2, 0)) # 计算正电子动量大小，使用 np.maximum 防止浮点误差导致负数求平方根
             pz = p * cos_theta # 计算正电子在 z 方向的动量分量
             E_lab = GAMMA * (E + BETA * pz) # 计算正电子在实验室参考系下的能量
-
-            results.append([T.round(2), E_lab.round(2)])
+            T=np.round(T, 2) # 将时间转换为微秒并保留两位小数
+            E_lab=np.round(E_lab, 2) # 保留两位小数
+            results.append([T, E_lab])
             count += 1
             print(f"\rProgress: {count}/{N} events generated", end="")
         else:

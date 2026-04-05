@@ -4,7 +4,7 @@ import pandas as pd # 用于生成结构化的“探测器数据”表
 from scipy.optimize import curve_fit
 from constants import *
 
-file= "simulated_detector_data.csv"
+file= "Data_NEW.csv"
 
 try:
     data = np.genfromtxt(file, delimiter=",", names=True)
