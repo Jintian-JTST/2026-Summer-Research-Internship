@@ -58,7 +58,11 @@ print(f"A     = {fit_A:.4f} ± {err_A:.4f}")
 print(f"omega = {fit_omega:.6f} ± {err_omega:.6f} rad/us")
 print(f"phi_0 = {fit_phi_0:.4f} ± {err_phi_0:.4f} rad")
 print("--------------------")
-
+pd.DataFrame({
+    'Parameter': ['N', 'A', 'omega (rad/us)', 'phi_0 (rad)'],
+    'Value': [fit_N, fit_A, fit_omega, fit_phi_0],
+    'Error': [err_N, err_A, err_omega, err_phi_0]
+}).to_csv("fit_results.csv", index=False)
 
 
 
