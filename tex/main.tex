@@ -32,7 +32,8 @@
 % 定义中文字体
 \setCJKmainfont{FandolSong}
 % 定义生僻字处理，当文字无法显示时前缀指令`\fallback`
-\setCJKfamilyfont{Babel}{BabelStone Han}
+\setCJKfamilyfont{Babel}{Microsoft YaHei} 
+% or {SimHei}, or {KaiTi}
 \newcommand{\fallback}{\CJKfamily{Babel}}
 
 % 设置一级标题左对齐
@@ -67,9 +68,24 @@
 \author{白\fallback{鹡鸰}}
 \date{}
 
+
+
+
+
+
+
+
+
+
+
+
+
 \begin{document}
 
 \maketitle
+%\thispagestyle{empty}   % 让标题页不显示页眉页脚
+
+\pagestyle{fancy}       % 从下一页开始再启用页眉页脚
 
 \section{关于此模版}
 

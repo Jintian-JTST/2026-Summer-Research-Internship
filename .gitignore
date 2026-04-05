@@ -15,3 +15,12 @@ venv/
 *.csv
 *.feather
 *.ipynb
+
+
+# 先忽略 tex 目录全部
+tex/*
+
+# 再把需要的放出来
+!tex/*.tex
+!tex/*.bib
+!tex/*.pdf
