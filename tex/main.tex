@@ -16,11 +16,17 @@
 \usepackage{url}
 \usepackage[dvipsnames]{xcolor}
 
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usepackage{tikz-3dplot}
+\usetikzlibrary{calc,arrows.meta,angles,quotes,decorations.pathreplacing,positioning}
+
+
 % 设置页眉，从第二页开始
 \pagestyle{fancy}
-\fancyhead[L]{学生姓名}
-\fancyhead[C]{项目名称}
-\fancyhead[R]{课程名称}
+\fancyhead[L]{王锦添}
+\fancyhead[C]{缪子反常磁矩实验 Toy MC 模拟与数据拟合}
+\fancyhead[R]{2026年4月}
 \fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{1pt}
 
@@ -35,6 +41,9 @@
 \setCJKfamilyfont{Babel}{Microsoft YaHei} 
 % or {SimHei}, or {KaiTi}
 \newcommand{\fallback}{\CJKfamily{Babel}}
+
+% 定义自定义命令
+\newcommand{\spin}{\text{spin}}
 
 % 设置一级标题左对齐
 \ctexset{
@@ -64,10 +73,9 @@
 % 定义引用源
 \addbibresource{ref.bib}
 
-\title{\textbf{上海交通大学-课程项目报告（非官方模版）}}
-\author{白\fallback{鹡鸰}}
-\date{}
-
+\title{\textbf{缪子反常磁矩实验 Toy MC 模拟与数据拟合}}
+\author{王锦添}
+\date{2026年4月}
 
 
 
@@ -87,68 +95,171 @@
 
 \pagestyle{fancy}       % 从下一页开始再启用页眉页脚
 
-\section{关于此模版}
+\section{引言}
 
-\subsection{适用范围}
+标准模型（Standard Model）是现代物理学迄今为止最成功的理论之一\cite{BOSTON2023}，然而它并非完美无缺：在预测缪子的反常磁矩方面，标准模型的理论计算与实验测量之间存在着显著的差异，这被称为缪子 $g-2$ 问题。在美国费米实验室，缪子反常磁矩的精确测量实验已经进行多年，最新的结果显示了与标准模型预测之间的约4.2倍标准差的差距\cite{Li2022Muon}。因此，该实验的结果引发了物理学界的广泛关注和讨论，分析该实验数据的拟合过程对于理解这一现象至关重要。
 
-本文档是由上海交通大学控制导论课的助教搭建的专题写作项目模板，遵循MIT协议开源，欢迎其他课程的同学使用。
+这个程序旨在模拟缪子 $g-2$ 实验中的数据生成和分析过程，从模拟数据中提取物理参数，并通过拟合来验证理论模型。
 
-\subsection{基本参数}
+\section{原理与实现}
 
-此模版基于 \codeword{ctexart} 模版稍作调整，并增加了一些常用包和相应设置。目前仅在Overleaf上使用 \textsc{XeLaX} 编译并通过了测试。
+实验中，极化的缪子被注入一个均匀的磁场中，其圆周运动的频率记作 $\omega_c$，而缪子自旋的进动频率记作 $\omega_s$。缪子的反常磁矩会导致 $\omega_s$ 与$\omega_c$ 之间存在一个差值，计算可得\cite{PhysRevA103}
+\begin{equation}
+\omega_a = \omega_s - \omega_c= - a_\mu \frac{q}{m_\mu} B
+\end{equation}
 
-\subsubsection{字体}
+其中 $a_\mu$ 是缪子的反常磁矩，定义为\cite{BOSTON2023} $a_\mu = \frac{g-2}{2}$。$q$ 是缪子的电荷，$m_\mu$ 是缪子的质量，$B$ 是磁场强度。通过测量 $\omega_a$ 与 $B$，我们可以间接地测量 $a_\mu$，从而检验标准模型的预测。
 
-\begin{itemize}
-    \item 正文采用了了11号字体。
-    \item 中文正文默认字体为 \codeword{FandolSong}，英文正文默认字体为 \codeword{Times New Roman}。
-\end{itemize}
 
-\subsubsection{页面设置}
 
-\begin{itemize}
-    \item 默认页边距为四边各2.54厘米。
-    \item 默认行距为1.25倍。
-    
-\end{itemize}
+\subsection{正缪子衰变与正电子能量分布}
 
-\subsection{引用规范}
+正缪子衰变为一个正电子和两个中微子 $\mu^+ \longmapsto e^+ + \nu_\mu + \bar{\nu}_e$ ，正电子的能量分布由衰变动力学决定。对于极化缪子，正电子概率密度函数由 Michel Spectrum 描述\cite{Fetscher2019MuonDecay}：
+\begin{equation}
+\frac{d^2 \Gamma}{dx\, d\cos\alpha}
+=
+\frac{G_F^2 m_\mu^5}{192\pi^3}
+\left[
+3 - 2x \pm P_\mu \cos\alpha (2x - 1)
+\right] \cdot x^2
+\end{equation}
 
-此模版采用了中文参考文献著录/标注标准 \codeword{GB/T 7714-2015} 的 \href{https://github.com/hushidong/biblatex-gb7714-2015?tab=readme-ov-file#jumptotutorial}{biblatex实现} \parencite{gb7714}，考虑到上交投稿通常为IEEE刊物，文末引用的索引规则与IEEE对齐，采用的是\textbf{顺序编码制非上标}模式，关于该格式的更多信息请查阅IEEE官方格式文档。
+等式左侧为单位能量分数 $x = {E_e}/{E_{max}}$ 和极化角（电子射出方向与缪子自旋方向的夹角） $\alpha$ 的微分衰变率，$G_F$ 是费米常数，$m_\mu$ 是缪子质量，$P_\mu$ 是缪子极化度。式子中的 $\pm$ 取正，因为实验中使用的是正缪子。记 $\cos \alpha = \Omega$，简化后正电子的能量分布可以表示为：
+\begin{equation}
+f(x,\Omega) = x^2 [3 - 2x + P_\mu \Omega (2x - 1)]
+\end{equation}
 
-\section{常见格式错误}
+\subsection{正电子能量计算}
 
-从课程教学中，我们收集到了以下在中文学术写作中的常见错误：
+考察缪子衰变的时刻。记缪子参考系为 $\Gamma'$，在该参考系中缪子处于静止状态。以缪子前进方向（动量 $\mathbf{p}_\mu$ 方向）为 $z$ 轴建立球坐标系，正电子的动量方向 $\mathbf{p}_e$ 由极角 $\theta$ 和方位角 $\phi$ 描述。此时，记缪子的自旋方向 $\mathbf{S}$ 与 $z$ 轴的夹角为 $\psi$。该角度可以由缪子相位计算得到，在代码中通过 $\psi = \omega_a T + \phi_0$ 计算，其中 $T$ 是缪子寿命（即缪子产生到此刻的时间），$\phi_0$ 是初始相位。则
+\begin{equation}
+\Omega = \cos\alpha = \mathbf{S} \cdot \mathbf{p}_e = \sin\psi \sin\theta \cos\phi + \cos\psi \cos\theta
+\end{equation}
 
-（待办事项：完善格式错误的样例、解释、与正确示范）
 
-\subsection{英文术语相关错误}
+电子在 $\Gamma'$ 中可以获得的最高能量 $E'_{max} = (m_\mu^2 + m_e^2) / (2 m_\mu)$。 此时电子能量为 $E'=x E'_{max}$，动量为 $p'=\sqrt{E'^2 - m_e^2}$。根据狭义相对论，电子在 $\Gamma$ 中的能量 $E$ 可以通过以下公式计算\cite{Chu2021Muon}：
+\begin{equation}
+E = \gamma (E' + \beta p' \cos\theta )
+\end{equation}
 
-\subsubsection{大小写规则不稳定}
 
-\subsubsection{缩写规则不稳定}
+在实验中，我们设定了一个能量阈值 $E_{th}$，只有当正电子的能量 $E_e$ 满足 $E_e > E_{th}$ 时，才会被计数为一个事件。程序中通过比较计算得到的 $E$ 与 $E_{th}$ 来筛选事件，并将满足条件的事件记录下来用于后续分析。
 
-\subsection{文末引用相关错误}
+\subsection{实验数据}
 
-\subsubsection{空格规则部分定}
+在程序中，为了接近实验条件，我选取了如下参数：
 
-\subsubsection{索引位置错误}
+\begin{table}[htbp]
+\centering
+\begin{tabular}{llll}
+\hline
+\hline
+参数 & 符号 & 数值 & 单位 \\
+\hline
+\hline
+电子质量 & $m_e$ & $0.511$ & $\mathrm{MeV\, c^{-2}}$ \\
+缪子质量 & $m_\mu$ & $105.658$ & $\mathrm{MeV\, c^{-2}}$ \\
+缪子寿命 & $\tau_\mu$ & $2.2$ & $\mathrm{\mu s}$ \\
+洛伦兹因子 & $\gamma$ & $29.3$ & - \\
+缪子极化度\cite{PhysRevAccelBeams.24.044002}  & $P_\mu$ & $1.0$ & - \\
+能量阈值\cite{BOSTON2023} & $E_{th}$ & $1700$ & $\mathrm{MeV}$  \\
+缪子初始相位 & $\phi_0$ & $0$ & $\mathrm{rad}$ \\
+缪子回旋频率\cite{BOSTON2023} & $\omega_c$ & $42.11$ & $\mathrm{rad\, s^{-1}}$ \\
+反常自旋进动频率\cite{PhysRevLett.126.141801} & $\omega_a$ & $1.439$ & $\mathrm{rad\, s^{-1}}$ \\
+\hline
+\hline
+\end{tabular}
+\caption{模拟中使用的实验参数}
+\end{table}
 
-\subsection{标点符号相关错误}
 
-\subsubsection{半角与全角混用}
+\begin{figure}[htbp]
+\centering
+\tdplotsetmaincoords{68}{120}
+\begin{tikzpicture}[tdplot_main_coords,scale=3,>=Stealth]
 
-\section{总结与倡议}
+    % Axes
+    \draw[->,thick] (0,0,0) -- (1.45,0,0) node[below left] {$x$};
+    \draw[->,thick] (0,0,0) -- (0,1.45,0) node[below right] {$y$};
+    \draw[->,thick] (0,0,0) -- (0,0,1.45) node[above] {$z$};
 
-大部分的错误并非绝对意义上的“错误”，而是因为中英文格式混用导致的视觉不适。归根到底，应当归咎于：
+    % Origin
+    \fill (0,0,0) circle (0.015);
+    \node[below left] at (0,0,0) {muon};
 
-\begin{enumerate}
-    \item 理工科的学术报告中，会涉及大量缺乏对应中文的新术语，在被迫中英文参杂的写作过程中，稍有不慎就会出现排版纰漏；
-    \item 中文的学术写作缺乏一份通用的、被广泛认可的格式规范。
-\end{enumerate}
+    % Muon spin vector before decay
+    \coordinate (S) at (0.55,0.20,0.95);
+    \coordinate (Sp) at (0.55,0.20,0);
 
-目前国内社区尚未提供一份通用的、适用于课程项目和毕业论文的简体中文格式协议，这对于大学课程教学和学生学习都是一项必要的资料。因此，有必要确立并推广一份标准化格式协议，以帮助本科同学们更快地上手学术写作的基本规范。
+    \draw[->,very thick,red!80!black] (0,0,0) -- (S) node[above right] {$\vec S$};
+    \draw[dashed,red!60!black] (0,0,0) -- (Sp);
+    \draw[dashed,red!60!black] (Sp) -- (S);
 
+    % angle psi between S and z
+    \tdplotdrawarc[->,red!70!black,thick]{(0,0,0)}{0.35}{0}{22}{anchor=south west}{$\psi$}
+
+    % Text label
+    \node[align=left,fill=white,inner sep=1pt] at (0.55,1.15,0.05)
+    {\small \textbf{Before decay}\\[-1pt]
+     \small muon spin direction fixed\\[-1pt]
+     \small \(z\): reference axis};
+
+\end{tikzpicture}
+\caption{衰变前：只画出缪子的自旋方向 \(\vec S\) 和参考坐标轴。}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\tdplotsetmaincoords{68}{120}
+\begin{tikzpicture}[tdplot_main_coords,scale=3,>=Stealth]
+
+    % Axes
+    \draw[->,thick] (0,0,0) -- (1.45,0,0) node[below left] {$x$};
+    \draw[->,thick] (0,0,0) -- (0,1.45,0) node[below right] {$y$};
+    \draw[->,thick] (0,0,0) -- (0,0,1.45) node[above] {$z$};
+
+    % Origin / decay point
+    \fill (0,0,0) circle (0.015);
+    \node[below left] at (0,0,0) {decay point};
+
+    % Spin vector retained as reference
+    \coordinate (S) at (0.55,0.20,0.95);
+    \coordinate (Sp) at (0.55,0.20,0);
+    \draw[->,very thick,red!80!black] (0,0,0) -- (S) node[above right] {$\vec S$};
+    \draw[dashed,red!60!black] (0,0,0) -- (Sp);
+    \draw[dashed,red!60!black] (Sp) -- (S);
+
+    % Positron momentum vector after decay
+    \coordinate (P) at (0.95,0.62,0.52);
+    \coordinate (Pp) at (0.95,0.62,0);
+    \draw[->,very thick,blue!80!black] (0,0,0) -- (P) node[above left] {$\vec P$};
+    \draw[dashed,blue!60!black] (0,0,0) -- (Pp);
+    \draw[dashed,blue!60!black] (Pp) -- (P);
+
+    % theta and phi
+    \tdplotdrawarc[->,blue!70!black,thick]{(0,0,0)}{0.48}{0}{33}{anchor=west}{$\theta$}
+    \tdplotdrawarc[->,blue!70!black,thick]{(0,0,0)}{0.33}{0}{34}{tdplot_main_coords,anchor=north}{$\phi$}
+
+    % alpha between S and P
+    \tdplotdrawarc[->,green!60!black,thick]{(0,0,0)}{0.62}{13}{58}{anchor=west}{$\alpha$}
+
+    % Text label
+    \node[align=left,fill=white,inner sep=1pt] at (0.55,1.15,0.05)
+    {\small \textbf{After decay}\\[-1pt]
+     \small emitted positron momentum \(\vec P\)\\[-1pt]
+     \small \(\alpha\): angle between \(\vec S\) and \(\vec P\)};
+
+\end{tikzpicture}
+\caption{衰变后：画出正电子动量 \(\vec P\) 以及它与自旋 \(\vec S\) 的夹角 \(\alpha\)。}
+\end{figure}
+
+
+
+
+
+
+
+\newpage
 \printbibliography[heading=bibliography,title=参考文献]
 
 \end{document}

@@ -20,7 +20,7 @@ def generation(N):
         
         pdf = (x**2) * (3 - 2*x + P_MU * cos_alpha * (2*x - 1))
 
-        y = np.random.uniform(0, 2) # 用于接受-拒绝的随机数，范围是 [0, PDF 的最大值]
+        y = np.random.uniform(0, 1+P_MU) # 用于接受-拒绝的随机数，范围是 [0, PDF 的最大值]
 
         if y <= pdf:
 
