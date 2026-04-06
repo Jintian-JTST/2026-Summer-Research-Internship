@@ -6,6 +6,7 @@ from constants import *
 
 file= FILE_NAME
 
+
 try:
     data = np.genfromtxt(file, delimiter=",", names=True)
 except FileNotFoundError:
@@ -14,7 +15,7 @@ except FileNotFoundError:
 
 
 useful_data = data[data['Energy_MeV'] > THRESHOLD] # 只保留能量大于阈值的事件
-counts, bin_edges = np.histogram(useful_data['Time_us'], bins=5000, range=(0, TIME_MAX))
+counts, bin_edges = np.histogram(useful_data['Time_us'], bins=NUM, range=(0, TIME_MAX))
 
 residuals = [bin_edges, counts]
 bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:]) # 计算 bin 的中心位置作为 x 轴坐标
@@ -69,10 +70,10 @@ pd.DataFrame({
 # 画图
 plt.figure(figsize=(15, 5))
 plt.scatter(bin_centers, counts, s=1)
-plot_time = np.linspace(0, TIME_MAX, 5000)
+plot_time = np.linspace(0, TIME_MAX, NUM)
 fit_curve = wiggle_fit_function(plot_time, *popt)
 plt.plot(plot_time, fit_curve, 'r-', linewidth=0.5, label="Fit")
-plt.title(f'Toy MC: Muon g-2 Wiggle Plot (E > {THRESHOLD/1000:.1f} GeV)\nAnomalous Precession $\\omega_a$ = {OMEGA_A} rad/us', fontsize=14)
+#plt.title(f'Toy MC: Muon g-2 Wiggle Plot (E > {THRESHOLD/1000:.1f} GeV)\nAnomalous Precession $\\omega_a$ = {OMEGA_A} rad/us', fontsize=14)
 plt.xlabel(r'Time in Lab Frame ($\mu s$)', fontsize=12)
 plt.ylabel('Number of High-Energy Positrons ($N_e$)', fontsize=12)
 plt.yscale('log') # 可选对数坐标
@@ -87,11 +88,11 @@ plt.show()
 # 画图
 plt.figure(figsize=(15, 5))
 plt.scatter(bin_centers, counts, s=1)
-'''plot_time = np.linspace(0, TIME_MAX, 5000)
+'''plot_time = np.linspace(0, TIME_MAX, NUM)
 fit_curve = wiggle_fit_function(plot_time, *popt)
 plt.plot(plot_time, fit_curve, 'r-', linewidth=0.5, label="Fit")
 '''
-plt.title(f'Toy MC: Muon g-2 Wiggle Plot (E > {THRESHOLD/1000:.1f} GeV)\nAnomalous Precession $\\omega_a$ = {OMEGA_A} rad/us', fontsize=14)
+#plt.title(f'Toy MC: Muon g-2 Wiggle Plot (E > {THRESHOLD/1000:.1f} GeV)\nAnomalous Precession $\\omega_a$ = {OMEGA_A} rad/us', fontsize=14)
 plt.xlabel(r'Time in Lab Frame ($\mu s$)', fontsize=12)
 plt.ylabel('Number of High-Energy Positrons ($N_e$)', fontsize=12)
 plt.yscale('log') # 可选对数坐标
@@ -109,7 +110,7 @@ plt.scatter(time_mod, counts, s=1)
 #plt.scatter(plot_time % 100, fit_curve,s=0.25, color='r', label="Fit")
 plt.xlabel("Time mod 100 ($\mu s$)")
 plt.ylabel(f"Counts (E > {THRESHOLD} MeV)")
-plt.title(f"Wiggle Plot (Time mod 100 $\mu s$)")
+#plt.title(f"Wiggle Plot (Time mod 100 $\mu s$)")
 plt.yscale("log")
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
@@ -119,12 +120,12 @@ plt.show()
 
 #生成时间除以100的余数为横坐标的wiggle plot
 time_mod = bin_centers % 100
-plt.figure(figsize=(12, 10))
+plt.figure(figsize=(12, 10))       
 plt.scatter(time_mod, counts, s=1)
 plt.scatter(plot_time % 100, fit_curve,s=0.25, color='r', label="Fit")
 plt.xlabel("Time mod 100 ($\mu s$)")
 plt.ylabel(f"Counts (E > {THRESHOLD} MeV)")
-plt.title(f"Wiggle Plot (Time mod 100 $\mu s$)")
+#plt.title(f"Wiggle Plot (Time mod 100 $\mu s$)")
 plt.yscale("log")
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()

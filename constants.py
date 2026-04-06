@@ -18,6 +18,7 @@ N_EVENTS = 50000000 # 模拟事件数 (数据量大一点 wiggle 会更平滑)
 P_MU = 0.95        # 极化度
 
 THRESHOLD = 1700.0 # 设定能量阈值 1.7 GeV
-TIME_MAX = 300.0    # 绘图和拟合的时间范围上限 (us)
-
+NUM=10000
+TIME_MAX = 600.0    # 绘图和拟合的时间范围上限 (us)
+THRESHOLD = 1700.0 # 设定能量阈值 1.7 GeV
 FILE_NAME = "Data.csv"
