@@ -39,8 +39,8 @@ def generation(N):
     return results
 
 detector_data = pd.DataFrame(generation(N_EVENTS), columns=['Time_us', 'Energy_MeV'])
-print("Data generation completed. Saving to Data.csv...")
-detector_data.to_csv("Data.csv", index=False)
+print("Data generation completed. Saving to",FILE_NAME)
+detector_data.to_csv(FILE_NAME, index=False)
 print("Data saved.")
 
 

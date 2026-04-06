@@ -78,7 +78,11 @@
 \date{2026年4月}
 
 
-
+\usepackage{caption}
+\captionsetup{
+  skip=4pt,
+  font={small}
+}
 
 
 
@@ -108,11 +112,10 @@
 \omega_a = \omega_s - \omega_c= - a_\mu \frac{q}{m_\mu} B
 \end{equation}
 
-其中 $a_\mu$ 是缪子的反常磁矩，定义为\cite{BOSTON2023} $a_\mu = \frac{g-2}{2}$。$q$ 是缪子的电荷，$m_\mu$ 是缪子的质量，$B$ 是磁场强度。通过测量 $\omega_a$ 与 $B$，我们可以间接地测量 $a_\mu$，从而检验标准模型的预测。
+其中 $a_\mu$ 是缪子的反常磁矩，定义为\cite{BOSTON2023} $a_\mu = \frac{g-2}{2}$。$q$ 是缪子的电荷，$m_\mu$ 是缪子的质量，$B$ 是磁场强度。通过测量 $\omega_a$ 与 $B$，我们可以间接地测量 $a_\mu$，从而检验标准模型的预测。在真实实验中，磁场强度 $B$ 可以通过质子在储能环中的拉莫进动频率 $\omega_p$ 来实现\cite{Chu2021Muon}，因此 $\omega_a$ 的测量是整个实验的核心。
 
 
-
-\subsection{正缪子衰变与正电子能量分布}
+\subsection{电子能量分布与计算}
 
 正缪子衰变为一个正电子和两个中微子 $\mu^+ \longmapsto e^+ + \nu_\mu + \bar{\nu}_e$ ，正电子的能量分布由衰变动力学决定。对于极化缪子，正电子概率密度函数由 Michel Spectrum 描述\cite{Fetscher2019MuonDecay}：
 \begin{equation}
@@ -129,12 +132,16 @@
 f(x,\Omega) = x^2 [3 - 2x + P_\mu \Omega (2x - 1)]
 \end{equation}
 
-\subsection{正电子能量计算}
-
-考察缪子衰变的时刻。记缪子参考系为 $\Gamma'$，在该参考系中缪子处于静止状态。以缪子前进方向（动量 $\mathbf{p}_\mu$ 方向）为 $z$ 轴建立球坐标系，正电子的动量方向 $\mathbf{p}_e$ 由极角 $\theta$ 和方位角 $\phi$ 描述。此时，记缪子的自旋方向 $\mathbf{S}$ 与 $z$ 轴的夹角为 $\psi$。该角度可以由缪子相位计算得到，在代码中通过 $\psi = \omega_a T + \phi_0$ 计算，其中 $T$ 是缪子寿命（即缪子产生到此刻的时间），$\phi_0$ 是初始相位。则
+考察缪子衰变的时刻。记缪子参考系为 $\Gamma'$，在该参考系中缪子处于静止状态。以缪子前进方向（动量 $\mathbf{p}_\mu$ 方向）为 $z$ 轴建立球坐标系，且令缪子动量在 $x$-$y$ 平面内的投影为初始轴线。则正电子的动量方向 $\mathbf{p}_e$ 由极角 $\theta$ 和方位角 $\phi$ 描述。此时，记缪子的自旋方向 $\mathbf{S}$ 与 $z$ 轴的夹角为 $\psi$。该角度可以由缪子相位计算得到，在代码中通过 $\psi = \omega_a T + \phi_0$ 计算，其中 $T$ 是缪子寿命（即缪子产生到此刻的时间），$\phi_0$ 是初始相位。则
 \begin{equation}
 \Omega = \cos\alpha = \mathbf{S} \cdot \mathbf{p}_e = \sin\psi \sin\theta \cos\phi + \cos\psi \cos\theta
 \end{equation}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{MuonPositronDiagram_ManimCE_v0.20.1.png}
+\caption{缪子衰变示意图，左图为缪子衰变前状态，右图为缪子衰变后电子状态。图中 $\mathbf{S}$ 是缪子的自旋，$\mathbf{p}_e$ 是正电子的动量。}
+\end{figure}
 
 
 电子在 $\Gamma'$ 中可以获得的最高能量 $E'_{max} = (m_\mu^2 + m_e^2) / (2 m_\mu)$。 此时电子能量为 $E'=x E'_{max}$，动量为 $p'=\sqrt{E'^2 - m_e^2}$。根据狭义相对论，电子在 $\Gamma$ 中的能量 $E$ 可以通过以下公式计算\cite{Chu2021Muon}：
@@ -145,9 +152,8 @@ E = \gamma (E' + \beta p' \cos\theta )
 
 在实验中，我们设定了一个能量阈值 $E_{th}$，只有当正电子的能量 $E_e$ 满足 $E_e > E_{th}$ 时，才会被计数为一个事件。程序中通过比较计算得到的 $E$ 与 $E_{th}$ 来筛选事件，并将满足条件的事件记录下来用于后续分析。
 
-\subsection{实验数据}
+\ 
 
-在程序中，为了接近实验条件，我选取了如下参数：
 
 \begin{table}[htbp]
 \centering
@@ -157,105 +163,45 @@ E = \gamma (E' + \beta p' \cos\theta )
 参数 & 符号 & 数值 & 单位 \\
 \hline
 \hline
-电子质量 & $m_e$ & $0.511$ & $\mathrm{MeV\, c^{-2}}$ \\
-缪子质量 & $m_\mu$ & $105.658$ & $\mathrm{MeV\, c^{-2}}$ \\
-缪子寿命 & $\tau_\mu$ & $2.2$ & $\mathrm{\mu s}$ \\
-洛伦兹因子 & $\gamma$ & $29.3$ & - \\
-缪子极化度\cite{PhysRevAccelBeams.24.044002}  & $P_\mu$ & $1.0$ & - \\
-能量阈值\cite{BOSTON2023} & $E_{th}$ & $1700$ & $\mathrm{MeV}$  \\
+电子质量\cite{NIST_electron_mass_energy_2022} & $m_e$ & $0.511$ & $\mathrm{MeV\, c^{-2}}$ \\
+缪子质量\cite{NIST_muon_mass_energy_2022} & $m_\mu$ & $105.658$ & $\mathrm{MeV\, c^{-2}}$ \\
+缪子实验室寿命\cite{PhysRevD.103.072002} & $\tau_\mu$ & $64.4$ & $\mathrm{\mu s}$ \\
+缪子极化度  & $P_\mu$ & $1.0$ & - \\
+能量阈值\cite{PhysRevD.103.072002} & $E_{th}$ & $1700$ & $\mathrm{MeV}$  \\
 缪子初始相位 & $\phi_0$ & $0$ & $\mathrm{rad}$ \\
 缪子回旋频率\cite{BOSTON2023} & $\omega_c$ & $42.11$ & $\mathrm{rad\, s^{-1}}$ \\
 反常自旋进动频率\cite{PhysRevLett.126.141801} & $\omega_a$ & $1.439$ & $\mathrm{rad\, s^{-1}}$ \\
+粒子数目 & $N$ & $5 \times 10^7$ & - \\
 \hline
 \hline
 \end{tabular}
-\caption{模拟中使用的实验参数}
+\caption{程序所使用的实验参数。参数标准尽可能贴近真实实验的数值。}
 \end{table}
 
 
-\begin{figure}[htbp]
-\centering
-\tdplotsetmaincoords{68}{120}
-\begin{tikzpicture}[tdplot_main_coords,scale=3,>=Stealth]
+\section{结果与分析}
 
-    % Axes
-    \draw[->,thick] (0,0,0) -- (1.45,0,0) node[below left] {$x$};
-    \draw[->,thick] (0,0,0) -- (0,1.45,0) node[below right] {$y$};
-    \draw[->,thick] (0,0,0) -- (0,0,1.45) node[above] {$z$};
-
-    % Origin
-    \fill (0,0,0) circle (0.015);
-    \node[below left] at (0,0,0) {muon};
-
-    % Muon spin vector before decay
-    \coordinate (S) at (0.55,0.20,0.95);
-    \coordinate (Sp) at (0.55,0.20,0);
-
-    \draw[->,very thick,red!80!black] (0,0,0) -- (S) node[above right] {$\vec S$};
-    \draw[dashed,red!60!black] (0,0,0) -- (Sp);
-    \draw[dashed,red!60!black] (Sp) -- (S);
-
-    % angle psi between S and z
-    \tdplotdrawarc[->,red!70!black,thick]{(0,0,0)}{0.35}{0}{22}{anchor=south west}{$\psi$}
-
-    % Text label
-    \node[align=left,fill=white,inner sep=1pt] at (0.55,1.15,0.05)
-    {\small \textbf{Before decay}\\[-1pt]
-     \small muon spin direction fixed\\[-1pt]
-     \small \(z\): reference axis};
-
-\end{tikzpicture}
-\caption{衰变前：只画出缪子的自旋方向 \(\vec S\) 和参考坐标轴。}
-\end{figure}
+在全部模拟事件中，我将满足能量阈值 $E_{th}$ 的事件筛选出来。当时间大于 $300\, \mathrm{\mu s}$ 时，因为数据样本不足的缘故，事件数目趋近于零，因此我将时间范围限制在 $[0, 300]\, \mathrm{\mu s}$ 内进行分析。对于该时间范围，切成 $n=5000$ 个时间区间，统计每个时间区间内满足条件的事件数目。
 
 \begin{figure}[htbp]
 \centering
-\tdplotsetmaincoords{68}{120}
-\begin{tikzpicture}[tdplot_main_coords,scale=3,>=Stealth]
-
-    % Axes
-    \draw[->,thick] (0,0,0) -- (1.45,0,0) node[below left] {$x$};
-    \draw[->,thick] (0,0,0) -- (0,1.45,0) node[below right] {$y$};
-    \draw[->,thick] (0,0,0) -- (0,0,1.45) node[above] {$z$};
-
-    % Origin / decay point
-    \fill (0,0,0) circle (0.015);
-    \node[below left] at (0,0,0) {decay point};
-
-    % Spin vector retained as reference
-    \coordinate (S) at (0.55,0.20,0.95);
-    \coordinate (Sp) at (0.55,0.20,0);
-    \draw[->,very thick,red!80!black] (0,0,0) -- (S) node[above right] {$\vec S$};
-    \draw[dashed,red!60!black] (0,0,0) -- (Sp);
-    \draw[dashed,red!60!black] (Sp) -- (S);
-
-    % Positron momentum vector after decay
-    \coordinate (P) at (0.95,0.62,0.52);
-    \coordinate (Pp) at (0.95,0.62,0);
-    \draw[->,very thick,blue!80!black] (0,0,0) -- (P) node[above left] {$\vec P$};
-    \draw[dashed,blue!60!black] (0,0,0) -- (Pp);
-    \draw[dashed,blue!60!black] (Pp) -- (P);
-
-    % theta and phi
-    \tdplotdrawarc[->,blue!70!black,thick]{(0,0,0)}{0.48}{0}{33}{anchor=west}{$\theta$}
-    \tdplotdrawarc[->,blue!70!black,thick]{(0,0,0)}{0.33}{0}{34}{tdplot_main_coords,anchor=north}{$\phi$}
-
-    % alpha between S and P
-    \tdplotdrawarc[->,green!60!black,thick]{(0,0,0)}{0.62}{13}{58}{anchor=west}{$\alpha$}
-
-    % Text label
-    \node[align=left,fill=white,inner sep=1pt] at (0.55,1.15,0.05)
-    {\small \textbf{After decay}\\[-1pt]
-     \small emitted positron momentum \(\vec P\)\\[-1pt]
-     \small \(\alpha\): angle between \(\vec S\) and \(\vec P\)};
-
-\end{tikzpicture}
-\caption{衰变后：画出正电子动量 \(\vec P\) 以及它与自旋 \(\vec S\) 的夹角 \(\alpha\)。}
+\includegraphics[width=\textwidth]{wiggle_line_fit_plot.png}
+\caption{电子数目随时间变化图像。横坐标为时间 $T/\mathrm{\mu s}$，纵坐标为电子数目。其中$T\in[0, 300]\, \mathrm{\mu s}$，$n=5000$，$\Delta t = 0.06\, \mathrm{\mu s}$。}
 \end{figure}
 
+自图像可以非常清晰地看到，电子数目随时间呈现出明显的振荡(wiggle)现象。该图像可以用一个五参数函数\cite{Fienberg2019}进行拟合：
+\begin{equation}
+  N(t) = N_0 e^{-t/\tau} \left(1 + A(E)\cos(\omega_a t + \phi_0)\right)
+\end{equation}
+
+五个需要拟合的参数分别是：初始事件数目 $N_0$，衰减时间常数 $\tau$，振荡幅度 $A(E)$，反常自旋进动频率 $\omega_a$，以及初始相位 $\phi_0$。拟合的结果得到 $\omega_a=1.4939(2)\, \mathrm{rad\ s^{-1}}$, $\phi_0=0.0055(17)\, \mathrm{rad}$。
 
 
-
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{wiggle_line_fit_plot_with_fit.png}
+\caption{拟合结果展示。红色曲线为拟合结果，蓝色点为生成数据。}
+\end{figure}
 
 
 
