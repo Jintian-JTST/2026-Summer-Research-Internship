@@ -14,7 +14,7 @@ OMEGA_C = 42.11     # 缪子动量在储藏环中的回旋角频率 (rad/μs)
 OMEGA_A = 1.439    # 反常自旋进动角频率 omega_a (rad/μs) -> 决定了 wiggle 的频率
 #RADIUS = 7.112     # 储藏环半径 (m)
 
-N_EVENTS = 50000 # 模拟事件数 (数据量大一点 wiggle 会更平滑)
+N_EVENTS = 50000000 # 模拟事件数 (数据量大一点 wiggle 会更平滑)
 P_MU = 0.95        # 极化度
 
 THRESHOLD = 1700.0 # 设定能量阈值 1.7 GeV
