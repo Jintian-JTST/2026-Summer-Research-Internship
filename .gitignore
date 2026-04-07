@@ -24,3 +24,6 @@ tex/*
 !tex/*.tex
 !tex/*.bib
 !tex/*.pdf
+
+
+*.parquet

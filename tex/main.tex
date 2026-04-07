@@ -101,7 +101,7 @@
 
 \section{引言}
 
-标准模型（Standard Model）是现代物理学迄今为止最成功的理论之一\cite{BOSTON2023}，然而它并非完美无缺：在预测缪子的反常磁矩方面，标准模型的理论计算与实验测量之间存在着显著的差异，这被称为缪子 $g-2$ 问题。在美国费米实验室，缪子反常磁矩的精确测量实验已经进行多年，最新的结果显示了与标准模型预测之间的约4.2倍标准差的差距\cite{Li2022Muon}。因此，该实验的结果引发了物理学界的广泛关注和讨论，分析该实验数据的拟合过程对于理解这一现象至关重要。
+标准模型（Standard Model）是现代物理学迄今为止最成功的理论之一\cite{BOSTON2023}，然而它并非完美无缺：在预测缪子的反常磁矩方面，标准模型的理论计算与实验测量之间存在着显著的差异，这被称为缪子 $g-2$ 问题。在美国费米实验室，缪子反常磁矩的精确测量实验已经进行多年，2021年测量结果显示了与标准模型预测之间的约4.2倍标准差的差距\cite{Li2022Muon}。因此，该实验引发了物理学界的广泛关注和讨论，分析该实验数据的拟合过程对于理解这一现象至关重要。
 
 这个程序旨在模拟缪子 $g-2$ 实验中的数据生成和分析过程，从模拟数据中提取物理参数，并通过拟合来验证理论模型。
 
@@ -179,7 +179,7 @@ E = \gamma (E' + \beta p' \cos\theta )
 \end{table}
 
 
-\section{拟合与分析}
+\section{模拟数据拟合与分析}
 
 \subsection{五参数模型}
 
@@ -243,51 +243,15 @@ E = \gamma (E' + \beta p' \cos\theta )
 
 在图像底部，原本清晰的振荡结构逐渐退化为离散的散点分布。这主要是由于缪子衰变概率随着时间增加而指数减小，导致单个时间分箱内满足能量阈值的正电子数显著减少。在对数坐标下，这种离散计数会表现为明显的分层结构，从而形成条带状分布。
 
-\subsection{FFT 频谱分析}
+\subsection{残差频谱绘制}
 
-拟合过后我取了数据的残差。在对真实实验数据处理时\cite{PhysRevD.103.072002,Chu2021Muon}，常用到快速傅里叶变换（FFT）进行分析，以提取数据中的主要频率特征。因此我也对模拟数据绘制了频谱，见图\ref{fake_fft}。
-
-
-\section{模拟结果与实验数据的比较}
-
-在获取了真实实验数据后，我采取了和实验数据一样的方法，进行了时间分箱、能量阈值筛选和拟合。实验数据的分析结果如下。
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\textwidth]{real_wiggle_plot_run6A.png}
-\caption{真实实验数据的正电子数目随时间的变化图像。$T\in[0, 660]\, \mathrm{\mu s}$，$\Delta t \approx 0.141\, \mathrm{\mu s}$。高于能量阈值的正电子总数目为 $2.13 \times 10^9$，为模拟数据量的 $42.6$ 倍，因此在 $T>600\, \mathrm{\mu s}$ 时依然可以呈现清晰的震荡结构。}
-\label{real_wiggle_plot_run6A}
-\end{figure}
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\textwidth]{residual_time_compare.png}
-\caption{模拟结果与实验数据拟合后残差比较。}
-\end{figure}
-
-
-
-对数据取残差后，对图\ref{real_residual}做 FFT，得到图\ref{real_fft}。将模拟结果图\ref{fake_fft}与真实结果图\ref{real_fft}进行比较，得到图\ref{compare_fft}。
-
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\textwidth]{residual_fft_compare.png}
-\caption{模拟结果与实验数据残差的快速傅里叶变换（FFT）频谱比较。}
-\label{compare_fft}
-\end{figure}
-
-计算可得模拟数据残差的平均增幅 $A_{exp}=7.577$，实验数据残差的平均增幅 $A_{real}=0.204$，推测主要是实验数据总量远大于模拟数据导致。
-
-
-
-\section{总结}
-
-\dots
-
-\newpage
-
-\section{附录}
+拟合完成后，为了研究模型未能描述的时间结构，我构造了数据的残差。残差定义为
+\begin{equation}
+\mathrm{residual}(t)
+=
+\frac{N_{\mathrm{data}}(t) - N_{\mathrm{fit}}(t)}
+{\sqrt{N_{\mathrm{fit}}(t)}} \, ,
+\end{equation}
 
 \begin{figure}[htbp]
 \centering
@@ -296,11 +260,31 @@ E = \gamma (E' + \beta p' \cos\theta )
 \end{figure}
 
 
+其中 $N_{\mathrm{data}}(t)$ 为实验数据在时间 $t$ 处的计数，$N_{\mathrm{fit}}(t)$ 为对应的拟合结果。该定义相当于对偏差进行了统计误差加权，从而使不同时间区间的涨落具有可比性。随后我对残差进行快速傅里叶变换（FFT），以分析拟合模型未能描述的频率成分，如图\ref{fake_fft}所示。
+
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{1.png}
-\caption{模拟结果残差的快速傅里叶变换（FFT）频谱。}
+\includegraphics[width=\textwidth]{fft_raw_and_residual_from_parquet.png}
+\caption{模拟结果残差的快速傅里叶变换（FFT）频谱。橙色为残差，蓝色为原始数据。}
 \label{fake_fft}
+\end{figure}
+
+
+\section{实验数据分析}
+
+和模拟数据一样，我对实验数据进行了拟合、残差计算和频谱绘制。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{wiggle_fit_run6A_with_fit.png}
+\caption{真实实验数据的正电子数目随时间的变化图像。$T\in[0, 660]\, \mathrm{\mu s}$，$\Delta t \approx 0.141\, \mathrm{\mu s}$。}
+\label{real_wiggle_plot_run6A}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{wiggle_fit_run6A.png}
+\caption{图\ref{real_wiggle_plot_run6A}的拟合结果展示。$T\in[0, 660]\, \mathrm{\mu s}$，$\Delta t \approx 0.141\, \mathrm{\mu s}$。}
 \end{figure}
 
 
@@ -312,12 +296,73 @@ E = \gamma (E' + \beta p' \cos\theta )
 \end{figure}
 
 
+
+
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{fft_original_and_residual_run6A.png}
+\includegraphics[width=\textwidth]{111fft_residual_left_style.png}
 \caption{真实实验数据残差的快速傅里叶变换（FFT）频谱。}
 \label{real_fft}
 \end{figure}
+
+
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{wiggle_mod100.png}
+\end{minipage}
+\hfill
+\begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{wiggle_mod100_with_fit.png}
+\end{minipage}
+\caption{实验数据选取$T\in[0, 660]\, \mathrm{\mu s}$，$\Delta t \approx 0.141\, \mathrm{\mu s}$在摆动图上的呈现。左图为原始数据，右图为加入拟合函数后的结果。}
+\end{figure}
+
+不难发现，实验数据的摆动图尽管在 $T$ 值较大的情况下保持了良好的连续性，并未像模拟数据那样出现了明显的分层，说明在单个时间分箱内满足能量阈值的正电子数仍然足够支持分析。我将在下一章节对模拟数据和实验数据的进行更加细致的分析。
+
+
+
+\section{模拟结果与实验数据的比较}
+
+\subsection{残差分布比较}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{residual_time_compare.png}
+\caption{模拟结果与实验数据拟合后残差比较。橙色散点为模拟数据，蓝色散点为实验数据。}
+\label{23}
+\end{figure}
+
+实验数据中高于能量阈值的正电子总数目为 $2.13 \times 10^9$，为模拟样本量的 $42.6$ 倍，因此图\ref{real_wiggle_plot_run6A}中在 $T>600\, \mathrm{\mu s}$ 时依然可以呈现清晰的震荡结构。同理，在图\ref{23}中，模拟结果的散点在任意时刻的分布范围均广于实验数据。
+
+\subsection{残差频谱比较}
+
+对真实实验数据取残差后进行 FFT得到图\ref{real_fft}。将模拟结果图\ref{fake_fft}与真实结果图\ref{real_fft}进行比较，得到图\ref{compare_fft}。
+
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{fft_residual_left_style_no_log.png}
+\caption{模拟结果与实验数据残差的快速傅里叶变换（FFT）频谱比较。蓝线为模拟数据，红线为实验数据。频谱中三个实验数据最高峰分别为 $f_1 =0.2286\, \mathrm{MHz}$， $f_2 = 0.4586\, \mathrm{MHz}$， $f_3 = 0.6872\, \mathrm{MHz}$。}
+\label{compare_fft}
+\end{figure}
+
+尽管我已经取了残差，但是在做 FFT 时，仍然得到了频率位于 $f_a$ （约0.23 MHz\cite{Chu2021Muon}）的最高峰，以及位于其二倍的 $2f_a$ 和三倍的 $3f_a$ 的两个次高峰。除去这三个高峰，频谱上并无出现明显特征。然而与之前的多轮实验不同的是，我没有从频谱上发现 $f_{CBO}$、$f_{CBO}\pm f_a$ \cite{PhysRevD.103.072002,PhysRevLett.131.161802,Chu2021Muon} 等其他特征。
+
+\section{总结}
+
+\dots
+
+\newpage
+
+\section{附录}
+
+
+
+
 
 
 
