@@ -96,18 +96,18 @@ print("--------------------")
 
 # --- 6. 画 wiggle plot (根据你提供的代码风格) ---
 plt.figure(figsize=(12, 6))
-plt.plot(time_centers, counts, lw=1, color='blue', alpha=0.5, label="Data")
-plot_time = np.linspace(time_min, time_max, 1000)
+plt.scatter(time_centers, counts, s=0.5, label="Data")
+plot_time = np.linspace(time_min, time_max, 10000)
 fit_curve = wiggle_fit_function(plot_time, *popt)
-plt.plot(plot_time, fit_curve, 'r-', linewidth=2, label="Fit")
+plt.plot(plot_time, fit_curve, 'r-', linewidth=0.5, label="Fit")
 
 # 应用相同的时间显示范围
-plt.xlim(time_min, time_max)
+plt.xlim(0, 660)
 
 # 添加带单位的标签 (使用原始字符串 r"" 防止转义字符报错)
 plt.xlabel(r"Time ($\mu s$)") 
 plt.ylabel(f"Counts (E > {threshold} MeV)") 
-plt.title(f"Wiggle Plot and Fit (Zoomed: {time_min}-{time_max} $\mu s$)")
+#plt.title(f"Wiggle Plot and Fit (Zoomed: {time_min}-{time_max} $\mu s$)")
 plt.yscale("log") 
 plt.grid(True, which="both", ls="--", alpha=0.5)
 
@@ -117,11 +117,11 @@ text_results = f"""Fit Parameters:
    $A = ${fit_A:.3f} $\pm$ {err_A:.3f}
    $\omega = ${fit_omega:.5f} $\pm$ {err_omega:.5f} rad/$\mu$s
    $\phi_0 = ${fit_phi_0:.3f} $\pm$ {err_phi_0:.3f} rad"""
-plt.text(0.65, 0.95, text_results, transform=plt.gca().transAxes,
-         fontsize=12, verticalalignment='top', 
-         bbox=dict(boxstyle='round,pad=0.5', fc='wheat', alpha=0.8))
+#plt.text(0.65, 0.95, text_results, transform=plt.gca().transAxes,
+#         fontsize=12, verticalalignment='top', 
+#         bbox=dict(boxstyle='round,pad=0.5', fc='wheat', alpha=0.8))
 
-plt.legend(fontsize=12)
+#plt.legend(fontsize=12)
 plt.tight_layout()
 
 # 保存图片

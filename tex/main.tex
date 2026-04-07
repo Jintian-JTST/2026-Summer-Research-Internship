@@ -166,7 +166,7 @@ E = \gamma (E' + \beta p' \cos\theta )
 电子质量\cite{NIST_electron_mass_energy_2022} & $m_e$ & $0.511$ & $\mathrm{MeV\, c^{-2}}$ \\
 缪子质量\cite{NIST_muon_mass_energy_2022} & $m_\mu$ & $105.658$ & $\mathrm{MeV\, c^{-2}}$ \\
 缪子实验室寿命\cite{PhysRevD.103.072002} & $\tau_\mu$ & $64.4$ & $\mathrm{\mu s}$ \\
-缪子极化度\cite{PhysRevAccelBeams.24.044002}  & $P_\mu$ & $0.95$ & - \\
+缪子极化度\cite{PhysRevAccelBeams.24.044002}  & $P_\mu$ & $95\%$ & - \\
 能量阈值\cite{PhysRevD.103.072002} & $E_{th}$ & $1700$ & $\mathrm{MeV}$  \\
 缪子初始相位 & $\phi_0$ & $0$ & $\mathrm{rad}$ \\
 缪子回旋频率\cite{BOSTON2023} & $\omega_c$ & $42.11$ & $\mathrm{rad\, s^{-1}}$ \\
@@ -189,6 +189,7 @@ E = \gamma (E' + \beta p' \cos\theta )
 \centering
 \includegraphics[width=\textwidth]{wiggle_line_fit_plot.png}
 \caption{电子数目随时间变化图像。横坐标为时间 $T/\mathrm{\mu s}$，纵坐标为电子数目。其中$T\in[0, 300]\, \mathrm{\mu s}$，$n=5000$，$\Delta t = 0.06\, \mathrm{\mu s}$。}
+\label{wiggle_line_fit_plot}
 \end{figure}
 
 自图像可以非常清晰地看到，电子数目随时间呈现出明显的振荡(wiggle)现象。该图像可以用一个五参数函数\cite{Fienberg2019}进行拟合：
@@ -201,50 +202,70 @@ E = \gamma (E' + \beta p' \cos\theta )
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{wiggle_line_fit_plot_with_fit.png}
-\caption{拟合结果展示。红色曲线为拟合结果，蓝色点为生成数据。}
+\caption{图\ref{wiggle_line_fit_plot}的拟合结果展示。红色曲线为拟合结果，蓝色点为生成数据。}
 \end{figure}
 
 在相关文献中\cite{PhysRevD.103.072002,Chu2021Muon,PhysRevLett.131.161802}，常使用摆动图（wiggle plot）来展示超过能量阈值的正电子计数随时间的振荡行为。通过将时间对一个固定周期取模，可以将长时间范围内的数据折叠，从而更清晰地展示振荡结构。
 
 \begin{figure}[htbp]
 \centering
-\begin{minipage}{0.48\textwidth}
+\begin{minipage}{0.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{wiggle_plot_time_mod_100.png}
 \end{minipage}
 \hfill
-\begin{minipage}{0.48\textwidth}
+\begin{minipage}{0.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{wiggle_plot_time_mod_100_with_fit.png}
 \end{minipage}
 
-\caption{正电子计数随时间的振荡分布（wiggle plot）。左图为原始数据，右图为加入拟合函数后的结果。}
+\caption{图\ref{wiggle_line_fit_plot}的摆动图。左图为原始数据，右图为加入拟合函数后的结果。}
 \end{figure}
 
 
 \subsection{增大时间区间的拟合表现}
 
-在真实实验数据的分析中可以观察到，摆动图通常覆盖多个振荡周期，其有效时间范围约为 $600\text{--}700\,\mathrm{\mu s}$\cite{fienberg2019muong2}。为检验拟合结果对时间窗口的稳定性，我将分析时间范围扩展至 $600\,\mathrm{\mu s}$，并将时间分箱数增加至 $n=10000$ 进行重新拟合，得到 $\omega_a = 1.49302(2)\,\mathrm{rad\ s^{-1}}$。然而，绘制得到的摆动图在视觉上出现了明显差异。
+在真实实验数据的分析中可以观察到，摆动图通常覆盖多个振荡周期，其有效时间范围约为 $600\text{--}700\,\mathrm{\mu s}$\cite{fienberg2019muong2}。为检验拟合结果对时间窗口的稳定性，我将分析时间范围扩展至 $600\,\mathrm{\mu s}$，并将时间分箱数增加至 $n=10000$ 进行重新拟合，得到 $\omega_a = 1.49302(2)\,\mathrm{rad\ s^{-1}}$。这说明拟合结果对时间窗口的稳定性较好。然而，绘制得到的摆动图在视觉上出现了明显差异。
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{600wiggle_line_fit_plot.png}
-\caption{电子数目随时间变化图像。横坐标为时间 $T/\mathrm{\mu s}$，纵坐标为电子数目。其中$T\in[0, 600]\, \mathrm{\mu s}$，$n=10000$，$\Delta t = 0.06\, \mathrm{\mu s}$。}
-\label{1}
+\begin{minipage}{0.49\textwidth}s
+    \centering
+    \includegraphics[width=\textwidth]{600wiggle_plot_time_mod_100.png}
+\end{minipage}
+\hfill
+\begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{600wiggle_plot_time_mod_100_with_fit.png}
+\end{minipage}
+\caption{选取$T\in[0, 600]\, \mathrm{\mu s}$，$n=10000$，$\Delta t = 0.06\, \mathrm{\mu s}$在摆动图上的呈现。左图为原始数据，右图为加入拟合函数后的结果。}
 \end{figure}
 
-可以观察到，在图像右侧，原本清晰的振荡结构逐渐退化为离散的散点分布。这主要是由于随着时间增加，缪子数目按指数衰减，导致单个时间分箱内满足能量阈值的正电子数显著减少，甚至仅为个位数。在对数坐标下，这种离散计数会表现为明显的分层结构，从而形成图中所见的条带状分布。
+在图像底部，原本清晰的振荡结构逐渐退化为离散的散点分布。这主要是由于缪子衰变概率随着时间增加而指数减小，导致单个时间分箱内满足能量阈值的正电子数显著减少。在对数坐标下，这种离散计数会表现为明显的分层结构，从而形成条带状分布。
+
+
+\section{模拟结果与实验数据的比较}
+
+在获取了真实实验数据后，我采取了和实验数据一样的方法，进行了时间分箱、能量阈值筛选和拟合。实验数据的分析结果如图\ref{real_wiggle_plot_run6A}所示。
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{1wiggle_line_fit_plot.png}
-\caption{电子数目随时间变化图像。为图\ref{1}在线性坐标下的呈现。}
+\includegraphics[width=\textwidth]{real_wiggle_plot_run6A.png}
+\caption{真实实验数据的电子数目随时间的变化图像。$T\in[0, 660]\, \mathrm{\mu s}$，$\Delta t \approx 0.141\, \mathrm{\mu s}$。}
+\label{real_wiggle_plot_run6A}
 \end{figure}
 
+真实实验中，高于能量阈值的正电子总数目为 $2.13 \times 10^9$，为程序模拟的 $42.6$ 倍，因此在 $T>600\, \mathrm{\mu s}$ 时依然可以呈现清晰的震荡结构。
 
 
 
 
+
+\section{总结}
+
+
+
+\newpage
 \newpage
 \printbibliography[heading=bibliography,title=参考文献]
 
