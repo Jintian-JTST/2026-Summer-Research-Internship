@@ -59,7 +59,7 @@ time_centers = 0.5 * (time_edges[:-1] + time_edges[1:])
 
 print("Number of positrons above threshold:", values[:, energy_bin:].sum())
 
-# 6) 画 wiggle plot
+'''# 6) 画 wiggle plot
 plt.figure(figsize=(12, 6)) # 加大图表尺寸以适应放大显示
 plt.scatter(time_centers, counts, s=0.5)
 
@@ -75,9 +75,9 @@ plt.tight_layout()
 plt.savefig("D:\\Users\\JTST\\Desktop\\Desktop\\SI\\2026-Summer-Research-Internship\\real data\\plot\\real_wiggle_plot_run6A.png", dpi=300, bbox_inches='tight') # 保存图片
 plt.show()
 
+'''
 
-
-#生成时间除以100的余数为横坐标的wiggle plot
+'''#生成时间除以100的余数为横坐标的wiggle plot
 time_mod = time_centers % 100
 plt.figure(figsize=(12, 10))
 plt.scatter(time_mod, counts, s=0.5)
@@ -90,4 +90,59 @@ plt.tight_layout()
 plt.savefig("D:\\Users\\JTST\\Desktop\\Desktop\\SI\\2026-Summer-Research-Internship\\real data\\plot\\real_wiggle_plot_time_mod_100.png", dpi=300, bbox_inches='tight')
 plt.show()
 
+'''
 
+
+
+
+
+
+
+# ===== FFT of wiggle signal =====
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 取出有效区间
+mask = (time_centers >= time_min) & (time_centers <= time_max) & (counts > 0)
+t = time_centers[mask]
+y = counts[mask].astype(float)
+
+# 采样间隔 (单位: us)
+dt = t[1] - t[0]
+print("dt =", dt, "us")
+print("Nyquist frequency =", 1 / (2 * dt), "1/us = MHz")
+
+# ---- 去指数衰减趋势：log-linear 粗拟合 ----
+# y ~ exp(a t + b)
+coef = np.polyfit(t, np.log(y), 1)
+trend = np.exp(np.polyval(coef, t))
+
+# 残差信号：去掉整体衰减和 DC 分量
+y_det = y / trend
+y_det = y_det - np.mean(y_det)
+
+# 加窗，减少谱泄漏
+window = np.hanning(len(y_det))
+y_win = y_det * window
+
+# FFT
+Y = np.fft.rfft(y_win)
+freq = np.fft.rfftfreq(len(y_win), d=dt)   # 单位：1/us = MHz
+amp = np.abs(Y)
+
+# 画频谱
+plt.figure(figsize=(12, 6))
+plt.plot(freq, amp)
+plt.xlim(0, 2.0)   # 先看 0~1 MHz，g-2 主峰通常在这附近
+plt.xlabel("Frequency (MHz)")
+plt.ylabel("FFT amplitude")
+plt.yscale("log")
+plt.grid(True, which="both", ls="--", alpha=0.5)
+plt.tight_layout()
+plt.savefig(r"D:\Users\JTST\Desktop\Desktop\SI\2026-Summer-Research-Internship\real data\plot\real_fft_spectrum_run6A.png", dpi=300, bbox_inches="tight")
+plt.show()
+
+# 打印主峰位置
+peak_idx = np.argmax(amp[1:]) + 1   # 跳过直流分量
+print("Peak frequency =", freq[peak_idx], "MHz")
+print("Peak amplitude =", amp[peak_idx])
