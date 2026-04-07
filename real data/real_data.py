@@ -1,148 +1,292 @@
-# data.py
-# from real data in run6A.root, extract the 4-momentum, time, and position information for each detected positron
+# data_fft.py
+# Read run6A.root, build wiggle plot, fit main oscillation,
+# compute residuals, run FFT for both original wiggle and residual,
+# auto-find peaks, and mark them on the plots.
+
+import os
 import uproot
 import numpy as np
 import matplotlib.pyplot as plt
 
-# 1) 打开 ROOT 文件
-file = uproot.open("D:\\Users\\JTST\\Desktop\\Desktop\\SI\\2026-Summer-Research-Internship\\real data\\run6A.root")
+from scipy.optimize import curve_fit
+from scipy.signal import find_peaks
 
-# 2) 取出二维直方图
+
+# ============================================================
+# 0) Config
+# ============================================================
+ROOT_FILE = r"D:\Users\JTST\Desktop\Desktop\SI\2026-Summer-Research-Internship\real data\run6A.root"
+OUT_DIR = r"D:\Users\JTST\Desktop\Desktop\SI\2026-Summer-Research-Internship\real data\plot"
+
+THRESHOLD = 1700  # MeV
+TIME_MIN = 0.0
+TIME_MAX = 660.0
+
+# FFT search band (MHz)
+FFT_FMIN = 0.05
+FFT_FMAX = 3.0
+
+os.makedirs(OUT_DIR, exist_ok=True)
+
+
+# ============================================================
+# 1) Load histogram
+# ============================================================
+file = uproot.open(ROOT_FILE)
 hist = file["et_spectrum"]
 
-# 3) 取 bin 内容和 bin 边界
 values = hist.values()
 time_edges = hist.axis(0).edges()
 energy_edges = hist.axis(1).edges()
 
-'''# 4) 画二维能量-时间图
-plt.figure(figsize=(12, 6)) # 加大图表尺寸以适应放大显示
-plt.imshow(
-    values.T,
-    origin="lower",
-    aspect="auto",
-    extent=[time_edges[0], time_edges[-1], energy_edges[0], energy_edges[-1]],
-    cmap="viridis" # 使用更亮眼的色阶
-)'''
-
-# --- 手动设置显示范围 (放大并去掉不需要的数据) ---
-time_min, time_max = 0, 660      # 例如：只看 30us 到 400us
-energy_min, energy_max = 1700, 3200 # 例如：只看 1000MeV 到 3200MeV
-
-'''plt.xlim(time_min, time_max)
-plt.ylim(energy_min, energy_max)
-'''
-
-'''plt.colorbar(label="Counts")
-plt.xlabel("Time ($\mu s$)")
-plt.ylabel("Energy (MeV)")
-plt.title(f"Energy-Time Histogram (Zoomed: {time_min}-{time_max} $\mu s$)")
-#plt.yscale("log") # 能量轴通常使用对数坐标，方便观察高能尾部的 wiggle 结构
-plt.grid(True, which="both", ls="--", alpha=0.5)
-plt.tight_layout() # 移除边距
-plt.savefig("D:\\Users\\JTST\\Desktop\\Desktop\\SI\\2026-Summer-Research-Internship\\real data\\plot\\real_energy_time_histogram.png", dpi=300, bbox_inches='tight')
-plt.show()'''
-
-# 5) 设定能量阈值，做 wiggle plot
-threshold = 1700  # 单位按你的数据来，常见是 MeV
-
-print(len(time_edges) - 1)
+n_time_bins = len(time_edges) - 1
+print("Number of time bins:", n_time_bins)
 print("Number of total positrons:", values.sum())
 
-
-# 找到阈值对应的能量 bin
-energy_bin = np.searchsorted(energy_edges, threshold, side="left")
-
-# 假设第 0 轴是时间，第 1 轴是能量：
-counts = values[:, energy_bin:].sum(axis=1)
 time_centers = 0.5 * (time_edges[:-1] + time_edges[1:])
+
+energy_bin = np.searchsorted(energy_edges, THRESHOLD, side="left")
+counts = values[:, energy_bin:].sum(axis=1)
 
 print("Number of positrons above threshold:", values[:, energy_bin:].sum())
 
-'''# 6) 画 wiggle plot
-plt.figure(figsize=(12, 6)) # 加大图表尺寸以适应放大显示
-plt.scatter(time_centers, counts, s=0.5)
-
-# 应用相同的时间显示范围
-plt.xlim(time_min, time_max)
-
-plt.xlabel("Time ($\mu s$)") # 添加单位
-plt.ylabel(f"Counts (E > {threshold} MeV)") # 添加单位
-#plt.title(f"Wiggle Plot (Zoomed: {time_min}-{time_max} $\mu s$)")
-plt.yscale("log") # 对数坐标更清晰地展示 wiggle 结构
-plt.grid(True, which="both", ls="--", alpha=0.5)
-plt.tight_layout()
-plt.savefig("D:\\Users\\JTST\\Desktop\\Desktop\\SI\\2026-Summer-Research-Internship\\real data\\plot\\real_wiggle_plot_run6A.png", dpi=300, bbox_inches='tight') # 保存图片
-plt.show()
-
-'''
-
-'''#生成时间除以100的余数为横坐标的wiggle plot
-time_mod = time_centers % 100
-plt.figure(figsize=(12, 10))
-plt.scatter(time_mod, counts, s=0.5)
-plt.xlabel("Time mod 100 ($\mu s$)")
-plt.ylabel(f"Counts (E > {threshold} MeV)")
-#plt.title(f"Wiggle Plot (Time mod 100 $\mu s$)")
-plt.yscale("log")
-plt.grid(True, which="both", ls="--", alpha=0.5)
-plt.tight_layout()
-plt.savefig("D:\\Users\\JTST\\Desktop\\Desktop\\SI\\2026-Summer-Research-Internship\\real data\\plot\\real_wiggle_plot_time_mod_100.png", dpi=300, bbox_inches='tight')
-plt.show()
-
-'''
+dt = time_centers[1] - time_centers[0]
+print(f"dt = {dt:.6f} us")
+print(f"Nyquist frequency = {1 / (2 * dt):.6f} MHz")
 
 
+# ============================================================
+# 2) Main wiggle fit model
+# ============================================================
+# N(t) = N0 * exp(-t/tau) * (1 + A*cos(omega*t + phi))
+def wiggle_model(t, N0, tau, A, omega, phi):
+    return N0 * np.exp(-t / tau) * (1.0 + A * np.cos(omega * t + phi))
 
 
+# Select fit window and valid points
+mask = (
+    (time_centers >= TIME_MIN) &
+    (time_centers <= TIME_MAX) &
+    (counts > 0)
+)
 
-
-
-# ===== FFT of wiggle signal =====
-import numpy as np
-import matplotlib.pyplot as plt
-
-# 取出有效区间
-mask = (time_centers >= time_min) & (time_centers <= time_max) & (counts > 0)
-t = time_centers[mask]
+t = time_centers[mask].astype(float)
 y = counts[mask].astype(float)
 
-# 采样间隔 (单位: us)
-dt = t[1] - t[0]
-print("dt =", dt, "us")
-print("Nyquist frequency =", 1 / (2 * dt), "1/us = MHz")
+# Poisson-like weights
+sigma = np.sqrt(np.maximum(y, 1.0))
 
-# ---- 去指数衰减趋势：log-linear 粗拟合 ----
-# y ~ exp(a t + b)
-coef = np.polyfit(t, np.log(y), 1)
+# Initial guesses
+p0 = [
+    y.max(),             # N0
+    64.0,                # tau (us)
+    0.3,                 # A
+    2.0 * np.pi * 0.23,  # omega (rad/us)
+    0.0                  # phi
+]
+
+# Conservative bounds
+bounds = (
+    [0.0,   1.0,  0.0, 0.0,      -2*np.pi],
+    [np.inf, 500.0, 1.0, 10.0,     2*np.pi]
+)
+
+popt, pcov = curve_fit(
+    wiggle_model,
+    t, y,
+    p0=p0,
+    sigma=sigma,
+    absolute_sigma=False,
+    bounds=bounds,
+    maxfev=50000
+)
+
+fit = wiggle_model(t, *popt)
+
+N0_fit, tau_fit, A_fit, omega_fit, phi_fit = popt
+fa_fit = omega_fit / (2.0 * np.pi)
+
+print("\n=== Fit parameters ===")
+print(f"N0    = {N0_fit:.6e}")
+print(f"tau   = {tau_fit:.6f} us")
+print(f"A     = {A_fit:.6f}")
+print(f"omega = {omega_fit:.6f} rad/us")
+print(f"phi   = {phi_fit:.6f} rad")
+print(f"fa    = {fa_fit:.6f} MHz")
+
+
+# ============================================================
+# 3) Helper: FFT + peak finding
+# ============================================================
+def fft_with_peaks(signal, dt_us, fmin=0.05, fmax=3.0, prominence_frac=0.02):
+    """
+    signal: 1D array
+    dt_us: sampling interval in microseconds
+    returns: freq, amp, peak_freq, peak_amp, freq_search, amp_search, peaks
+    """
+    sig = np.asarray(signal, dtype=float)
+    sig = sig - np.mean(sig)
+    window = np.hanning(len(sig))
+    sig_win = sig * window
+
+    Y = np.fft.rfft(sig_win)
+    freq = np.fft.rfftfreq(len(sig_win), d=dt_us)  # MHz because dt is us
+    amp = np.abs(Y)
+
+    search_mask = (freq >= fmin) & (freq <= fmax)
+    freq_search = freq[search_mask]
+    amp_search = amp[search_mask]
+
+    if len(amp_search) == 0:
+        return freq, amp, np.nan, np.nan, freq_search, amp_search, np.array([])
+
+    prom = max(np.max(amp_search) * prominence_frac, 1e-12)
+    peaks, props = find_peaks(amp_search, prominence=prom)
+
+    if len(peaks) > 0:
+        best_local = peaks[np.argmax(amp_search[peaks])]
+        peak_freq = freq_search[best_local]
+        peak_amp = amp_search[best_local]
+    else:
+        idx = np.argmax(amp_search)
+        peak_freq = freq_search[idx]
+        peak_amp = amp_search[idx]
+
+    return freq, amp, peak_freq, peak_amp, freq_search, amp_search, peaks
+
+
+# ============================================================
+# 4) FFT of the original wiggle
+#    去掉指数趋势后再 FFT，避免 DC / envelope 主导
+# ============================================================
+coef = np.polyfit(t, np.log(np.maximum(y, 1.0)), 1)
 trend = np.exp(np.polyval(coef, t))
-
-# 残差信号：去掉整体衰减和 DC 分量
 y_det = y / trend
-y_det = y_det - np.mean(y_det)
 
-# 加窗，减少谱泄漏
-window = np.hanning(len(y_det))
-y_win = y_det * window
+freq0, amp0, peak_freq0, peak_amp0, freq0_search, amp0_search, peaks0 = fft_with_peaks(
+    y_det, dt, fmin=FFT_FMIN, fmax=FFT_FMAX, prominence_frac=0.02
+)
 
-# FFT
-Y = np.fft.rfft(y_win)
-freq = np.fft.rfftfreq(len(y_win), d=dt)   # 单位：1/us = MHz
-amp = np.abs(Y)
+print("\n=== Original wiggle FFT peak ===")
+print(f"Peak frequency = {peak_freq0:.6f} MHz")
+print(f"Peak amplitude = {peak_amp0:.6f}")
 
-# 画频谱
+
+# ============================================================
+# 5) Residuals
+# ============================================================
+# Relative residual; keep sign
+residual = (y - fit) / fit
+residual = residual - np.mean(residual)
+
+freq1, amp1, peak_freq1, peak_amp1, freq1_search, amp1_search, peaks1 = fft_with_peaks(
+    residual, dt, fmin=FFT_FMIN, fmax=FFT_FMAX, prominence_frac=0.02
+)
+
+print("\n=== Residual FFT peak ===")
+print(f"Peak frequency = {peak_freq1:.6f} MHz")
+print(f"Peak amplitude = {peak_amp1:.6f}")
+
+
+# ============================================================
+# 6) Plot: wiggle + fit
+# ============================================================
 plt.figure(figsize=(12, 6))
-plt.plot(freq, amp)
-plt.xlim(0, 2.0)   # 先看 0~1 MHz，g-2 主峰通常在这附近
-plt.xlabel("Frequency (MHz)")
-plt.ylabel("FFT amplitude")
+plt.scatter(t, y, s=2, label="Data")
+plt.plot(t, fit, lw=2, label="Fit")
+plt.xlim(TIME_MIN, TIME_MAX)
+plt.xlabel("Time ($\\mu s$)")
+plt.ylabel(f"Counts (E > {THRESHOLD} MeV)")
 plt.yscale("log")
 plt.grid(True, which="both", ls="--", alpha=0.5)
+plt.legend()
 plt.tight_layout()
-plt.savefig(r"D:\Users\JTST\Desktop\Desktop\SI\2026-Summer-Research-Internship\real data\plot\real_fft_spectrum_run6A.png", dpi=300, bbox_inches="tight")
+plt.savefig(os.path.join(OUT_DIR, "wiggle_fit_run6A.png"), dpi=300, bbox_inches="tight")
 plt.show()
 
-# 打印主峰位置
-peak_idx = np.argmax(amp[1:]) + 1   # 跳过直流分量
-print("Peak frequency =", freq[peak_idx], "MHz")
-print("Peak amplitude =", amp[peak_idx])
+
+# ============================================================
+# 7) Plot: residual in time domain
+# ============================================================
+plt.figure(figsize=(12, 5))
+plt.plot(t, residual, ".", ms=2)
+plt.xlabel("Time ($\\mu s$)")
+plt.ylabel("(data - fit) / fit")
+plt.grid(True, which="both", ls="--", alpha=0.5)
+plt.tight_layout()
+plt.savefig(os.path.join(OUT_DIR, "residual_time_run6A.png"), dpi=300, bbox_inches="tight")
+plt.show()
+
+
+# ============================================================
+# 8) Plot: FFT of original wiggle + residual FFT together
+# ============================================================
+plt.figure(figsize=(12, 4))
+
+#plt.plot(freq0, amp0, lw=1.0, label="Original wiggle FFT",color='black',alpha=0.5)
+plt.plot(freq1, amp1, lw=1.0, label="Residual FFT")
+
+plt.xlim(0, 3.0)
+#plt.yscale("log")
+plt.xlabel("Frequency (MHz)")
+plt.ylabel("FFT amplitude")
+plt.grid(True, which="both", ls="--", alpha=0.5)
+
+'''# Mark original peak
+if np.isfinite(peak_freq0):
+    plt.axvline(peak_freq0, color="C0", ls="--", lw=1.2)
+    plt.scatter([peak_freq0], [peak_amp0], color="C0", zorder=5)
+    plt.annotate(
+        f"{peak_freq0:.3f} MHz",
+        xy=(peak_freq0, peak_amp0),
+        xytext=(peak_freq0 + 0.06, peak_amp0 * 1.4),
+        arrowprops=dict(arrowstyle="->", lw=1, color="C0"),
+        fontsize=9,
+        color="C0"
+    )
+'''
+'''# Mark residual peak
+if np.isfinite(peak_freq1):
+    plt.axvline(peak_freq1, color="C3", ls="--", lw=1.2)
+    plt.scatter([peak_freq1], [peak_amp1], color="C3", zorder=5)
+    plt.annotate(
+        f"{peak_freq1:.3f} MHz",
+        xy=(peak_freq1, peak_amp1),
+        xytext=(peak_freq1 + 0.06, peak_amp1 * 1.4),
+        arrowprops=dict(arrowstyle="->", lw=1, color="C3"),
+        fontsize=9,
+        color="C3"
+    )'''
+
+plt.legend()
+plt.tight_layout()
+plt.savefig(os.path.join(OUT_DIR, "fft_original_and_residual_run6A.png"), dpi=300, bbox_inches="tight")
+plt.show()
+
+
+# ============================================================
+# 9) Optional: print top few peaks in each spectrum
+# ============================================================
+def print_top_peaks(freq_search, amp_search, label, n=5):
+    if len(amp_search) == 0:
+        print(f"\nNo data in {label} search band.")
+        return
+
+    prom = max(np.max(amp_search) * 0.02, 1e-12)
+    peaks, _ = find_peaks(amp_search, prominence=prom)
+
+    print(f"\n=== Top peaks: {label} ===")
+    if len(peaks) == 0:
+        idx = np.argmax(amp_search)
+        print(f"1: f = {freq_search[idx]:.6f} MHz, amp = {amp_search[idx]:.6f}")
+        return
+
+    peak_freqs = freq_search[peaks]
+    peak_amps = amp_search[peaks]
+    order = np.argsort(peak_amps)[::-1]
+
+    for i, idx in enumerate(order[:n], start=1):
+        print(f"{i}: f = {peak_freqs[idx]:.6f} MHz, amp = {peak_amps[idx]:.6f}")
+
+print_top_peaks(freq0_search, amp0_search, "original wiggle FFT")
+print_top_peaks(freq1_search, amp1_search, "residual FFT")

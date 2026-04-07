@@ -95,7 +95,7 @@ print(f"phi_0 = {fit_phi_0:.4f} ± {err_phi_0:.4f} rad")
 print("--------------------")
 
 # --- 6. 画 wiggle plot (根据你提供的代码风格) ---
-plt.figure(figsize=(12, 6))
+plt.figure(figsize=(12, 4))
 plt.scatter(time_centers, counts, s=0.5, label="Data")
 plot_time = np.linspace(time_min, time_max, 10000)
 fit_curve = wiggle_fit_function(plot_time, *popt)
