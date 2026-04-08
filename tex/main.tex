@@ -245,29 +245,30 @@ E = \gamma (E' + \beta p' \cos\theta )
 
 \subsection{残差频谱绘制}
 
-拟合完成后，为了研究模型未能描述的时间结构，我构造了数据的残差。残差定义为
-\begin{equation}
-\mathrm{residual}(t)
-=
-\frac{N_{\mathrm{data}}(t) - N_{\mathrm{fit}}(t)}
-{\sqrt{N_{\mathrm{fit}}(t)}} \, ,
-\end{equation}
+拟合完成后，为了研究模型未能描述的时间结构，我构造了数据的绝对残差\cite{BOSTON2023} $r_i(t)=N^{\mathrm{data}}_i(t) - N^{\mathrm{fit}}_i(t)$，其中 $N^{\mathrm{data}}_i(t)$ 为实验数据在时间 $t$ 处的计数，$N^{\mathrm{fit}}_i(t)$ 为对应的拟合结果。注意到残差的幅度随时间逐渐减小，这主要由于事例数随时间呈指数衰减 $N(t)\sim e^{-t/\tau}$，其泊松涨落满足$\sigma_N \sim \sqrt{N}$，因此残差的典型幅度也随时间减小。
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{residual_time_csv.png}
+\includegraphics[width=\textwidth]{residual.png}
 \caption{模拟结果拟合后残差随时间的分布。}
 \end{figure}
 
 
-其中 $N_{\mathrm{data}}(t)$ 为实验数据在时间 $t$ 处的计数，$N_{\mathrm{fit}}(t)$ 为对应的拟合结果。该定义相当于对偏差进行了统计误差加权，从而使不同时间区间的涨落具有可比性。随后我对残差进行快速傅里叶变换（FFT），以分析拟合模型未能描述的频率成分，如图\ref{fake_fft}所示。
+随后我对残差进行快速傅里叶变换（FFT），以分析拟合模型未能描述的频率成分。
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{fft_raw_and_residual_from_parquet.png}
-\caption{模拟结果残差的快速傅里叶变换（FFT）频谱。橙色为残差，蓝色为原始数据。}
+\includegraphics[width=\textwidth]{fft.png}
+\caption{模拟结果残差的快速傅里叶变换（FFT）频谱。橙色为残差频谱，蓝色为原始数据频谱。可以看到残差中主要振荡结构已被拟合函数去除。}
 \label{fake_fft}
 \end{figure}
+
+可以看到残差的频谱中未出现显著的特征峰，表明拟合后的残差在频域中不包含明显的结构。这说明五参数模型已经能够充分描述模拟数据中的主要时间依赖行为。
+
+
+
+
+
 
 
 \section{实验数据分析}
@@ -276,15 +277,16 @@ E = \gamma (E' + \beta p' \cos\theta )
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{wiggle_fit_run6A_with_fit.png}
-\caption{真实实验数据的正电子数目随时间的变化图像。$T\in[0, 660]\, \mathrm{\mu s}$，$\Delta t \approx 0.141\, \mathrm{\mu s}$。}
-\label{real_wiggle_plot_run6A}
-\end{figure}
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\textwidth]{wiggle_fit_run6A.png}
-\caption{图\ref{real_wiggle_plot_run6A}的拟合结果展示。$T\in[0, 660]\, \mathrm{\mu s}$，$\Delta t \approx 0.141\, \mathrm{\mu s}$。}
+\begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{wiggle_mod100.png}
+\end{minipage}
+\hfill
+\begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{wiggle_mod100_with_fit.png}
+\end{minipage}
+\caption{实验数据选取$T\in[0, 660]\, \mathrm{\mu s}$，$\Delta t \approx 0.141\, \mathrm{\mu s}$在摆动图上的呈现。左图为原始数据，右图为加入拟合函数后的结果。}
 \end{figure}
 
 
@@ -307,19 +309,6 @@ E = \gamma (E' + \beta p' \cos\theta )
 
 
 
-\begin{figure}[htbp]
-\centering
-\begin{minipage}{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{wiggle_mod100.png}
-\end{minipage}
-\hfill
-\begin{minipage}{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{wiggle_mod100_with_fit.png}
-\end{minipage}
-\caption{实验数据选取$T\in[0, 660]\, \mathrm{\mu s}$，$\Delta t \approx 0.141\, \mathrm{\mu s}$在摆动图上的呈现。左图为原始数据，右图为加入拟合函数后的结果。}
-\end{figure}
 
 不难发现，实验数据的摆动图尽管在 $T$ 值较大的情况下保持了良好的连续性，并未像模拟数据那样出现了明显的分层，说明在单个时间分箱内满足能量阈值的正电子数仍然足够支持分析。我将在下一章节对模拟数据和实验数据的进行更加细致的分析。
 
@@ -365,6 +354,18 @@ E = \gamma (E' + \beta p' \cos\theta )
 
 
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{wiggle_fit_run6A_with_fit.png}
+\caption{真实实验数据的正电子数目随时间的变化图像。$T\in[0, 660]\, \mathrm{\mu s}$，$\Delta t \approx 0.141\, \mathrm{\mu s}$。}
+\label{real_wiggle_plot_run6A}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{wiggle_fit_run6A.png}
+\caption{图\ref{real_wiggle_plot_run6A}的拟合结果展示。$T\in[0, 660]\, \mathrm{\mu s}$，$\Delta t \approx 0.141\, \mathrm{\mu s}$。}
+\end{figure}
 
 
 
