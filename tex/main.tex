@@ -26,7 +26,7 @@
 % 设置页眉，从第二页开始
 \pagestyle{fancy}
 \fancyhead[L]{王锦添}
-\fancyhead[C]{缪子反常磁矩实验的 Toy MC 程序模拟、摆动图构建与实验数据比较}
+\fancyhead[C]{缪子反常磁矩实验}
 \fancyhead[R]{2026年4月}
 \fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{1pt}
@@ -74,7 +74,7 @@
 % 定义引用源
 \addbibresource{ref.bib}
 
-\title{\textbf{缪子反常磁矩实验 Toy MC 模拟与数据拟合}}
+\title{\textbf{缪子反常磁矩实验的 Toy MC 程序模拟、摆动图构建与实验数据比较}}
 \author{王锦添}
 \date{2026年4月}
 
@@ -198,7 +198,7 @@ E = \gamma (E' + \beta p' \cos\theta )
   N(t) = N_0 e^{-t/\tau} \left(1 + A\cos(\omega_a t + \phi_0)\right)
 \end{equation}
 
-五个需要拟合的参数分别为：初始事件数目 $N_0$，衰减时间常数 $\tau$，振荡幅度 $A$，反常自旋进动频率 $\omega_a$，以及初始相位 $\phi_0$。拟合结果为 $\omega_a = 1.43902(2)\,\mathrm{rad\ \mu s^{-1}}$，$\phi_0 = 0.008(2)\,\mathrm{rad}$。注意到 $\omega_a$ 的注入参数与拟合参数的偏差在 $1\sigma$ 以内，表明五参数模型能够很好地描述数据。
+五个需要拟合的参数分别为：初始事件数目 $N_0$，衰减时间常数 $\tau$，振荡幅度 $A$，反常自旋进动频率 $\omega_a$，以及初始相位 $\phi_0$。拟合结果为 $\omega_a = 1.43899(2)\,\mathrm{rad\ \mu s^{-1}}$，$\phi_0 = 0.004(2)\,\mathrm{rad}$。注意到 $\omega_a$ 的注入参数与拟合参数的偏差在 $1\sigma$ 以内，表明五参数模型能够很好地描述数据。
 
 \begin{figure}[htbp]
 \centering
@@ -226,7 +226,7 @@ E = \gamma (E' + \beta p' \cos\theta )
 
 \subsection{增大时间区间的拟合表现}
 
-在真实实验数据的分析中可以观察到，摆动图通常覆盖多个振荡周期，其有效时间范围约为 $600\text{--}700\,\mathrm{\mu s}$\cite{Fienberg2019}。为检验拟合结果对时间窗口的稳定性，我将分析时间范围扩展至 $600\,\mathrm{\mu s}$，并将时间分箱数增加至 $n=10000$ 进行重新拟合，得到 $\omega_a = 1.49302(2)\,\mathrm{rad\ \mu s^{-1}}$。这说明拟合结果对时间窗口的稳定性较好。然而，绘制得到的摆动图在视觉上出现了明显差异。
+在真实实验数据的分析中可以观察到，摆动图通常覆盖多个振荡周期，其有效时间范围约为 $600\text{--}700\,\mathrm{\mu s}$\cite{Fienberg2019}。为检验拟合结果对时间窗口的稳定性，我将分析时间范围扩展至 $600\,\mathrm{\mu s}$，并将时间分箱数增加至 $n=10000$ 进行重新拟合，得到 $\omega_a = 1.43898(2)\,\mathrm{rad\ \mu s^{-1}}$。这说明拟合结果对时间窗口的稳定性较好。然而，绘制得到的摆动图在视觉上出现了明显差异。
 
 \begin{figure}[htbp]
 \centering
@@ -321,6 +321,28 @@ E = \gamma (E' + \beta p' \cos\theta )
 为了确保模拟结果和实验数据可以保持一致，我统一选取了与实验数据相同的时间范围，即 $T\in[10, 650]\, \mathrm{\mu s}$ 进行比较。
 
 \subsection{拟合数据比较}
+
+
+
+\begin{table}[htbp]
+\centering
+\caption{五参数模型拟合模拟结果与实验数据的比较。}
+\begin{tabular}{llll}
+\hline
+\hline
+物理量 & 模拟结果 & 实验数据 & 单位\\
+\hline
+\hline
+$N$ & $2.2120(7)\times 10^4$ & $5.7367(1) \times 10^6$ & - \\
+$A$ & $0.3372(4)$ & $0.38278(3)$ &-\\
+$\omega_a$ & $1.43898(2)$ & $1.439412(1)$ & $\mathrm{rad\ \mu s^{-1}}$  \\
+$\phi_0$ & $0.00(2)$ & $-2.1602(1)$ & $\mathrm{rad}$\\
+\hline
+\hline
+\end{tabular}
+\end{table}
+
+
 
 
 

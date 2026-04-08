@@ -68,10 +68,10 @@ err_N, err_A, err_omega, err_phi_0 = perr
 
 
 print("--- Fit Results ---")
-print(f"N     = {fit_N:.3e} ± {err_N:.3e}")
-print(f"A     = {fit_A:.4f} ± {err_A:.4f}")
-print(f"omega = {fit_omega:.6f} ± {err_omega:.6f} rad/us")
-print(f"phi_0 = {fit_phi_0:.4f} ± {err_phi_0:.4f} rad")
+print(f"N     = {fit_N:.8f} ± {err_N:.8f}")
+print(f"A     = {fit_A:.8f} ± {err_A:.8f}")
+print(f"omega = {fit_omega:.8f} ± {err_omega:.8f} rad/us")
+print(f"phi_0 = {fit_phi_0:.8f} ± {err_phi_0:.8f} rad")
 print("--------------------")
 pd.DataFrame({
     'Parameter': ['N', 'A', 'omega (rad/us)', 'phi_0 (rad)'],

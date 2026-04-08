@@ -9,11 +9,14 @@ def generation(N):
     count = 0
 
     while count < N:
-        scale=min(1000,(N-count))
+        scale=int(min(10000,int(N-count)))#每loop生成1000个muon
+        success = np.zeros(int(scale))
 
 
         T = np.random.exponential(scale=TAU_LAB,size=scale) # t_lab 是每个muon衰变的绝对时间，满足指数分布
         phase = OMEGA_A * T # 自旋进动相位
+
+
 
         x= np.random.uniform(0, 1,size=scale) # x_e 的归一化能量
         cos_theta = np.random.uniform(-1, 1,size=scale) # cos(theta_e) 的范围是 [-1, 1]
@@ -23,30 +26,82 @@ def generation(N):
         
         pdf = (x**2) * (3 - 2*x + P_MU * cos_alpha * (2*x - 1))
 
-        y = np.random.uniform(0, 1+P_MU,size=scale) # 用于接受-拒绝的随机数，范围是 [0, PDF 的最大值]
 
+        # MC
+        y = np.random.uniform(0, 1+P_MU,size=scale) # 用于接受-拒绝的随机数
         accept=y<=pdf
 
+        success[accept]=1
         T=T[accept]
         x=x[accept]
         cos_theta=cos_theta[accept]
+        phi=phi[accept]
 
+        sin_theta = np.sqrt(1 - cos_theta**2) #重新筛选cos 删了后面报错
+
+
+        num_accepted = len(T)
+        needed = N - count
+        # 4. 【关键修改】如果当前批次接受的数量大于所需的数量，进行截断
+        if num_accepted > needed:
+            T = T[:needed]
+            x = x[:needed]
+            cos_thetac = cos_theta[:needed]
+            phi= phi[:needed]
+            num_accepted = needed # 更新实际接受的数量
+            
+
+        # 筛选后计算
         E = x * E_MAX # 计算正电子能量
-        p= np.sqrt(np.maximum(E**2 - M_E**2, 0)) # 计算正电子动量大小，使用 np.maximum 防止浮点误差导致负数求平方根
-        pz = p * cos_theta # 计算正电子在 z 方向的动量分量
-        E_lab = GAMMA * (E + BETA * pz) # 计算正电子在实验室参考系下的能量
-        T=np.round(T, 2) # 将时间转换为微秒并保留两位小数
-        E_lab=np.round(E_lab, 2) # 保留两位小数
-        results.extend(zip(T, E_lab))
-        count += np.sum(accept)
+        p= np.sqrt(np.maximum(E**2 - M_E**2, 0)) # 计算正电子动量大小
 
-        if count % 100000 ==0:
-            print(f"\rProgress: {count}/{N} events generated", end="")
+        px_prime = p * sin_theta * np.cos(phi)  # 计算正电子在 x 方向的动量分量
+        py_prime = p * sin_theta * np.sin(phi) # 计算正电子在 y 方向的动量分量
+        pz_prime = p * cos_theta # 计算正电子在 z 方向的动量分量
 
+        # position
+        PHI_C = OMEGA_C * T # 磁场进动相位
+        PosX=RADIUS * np.cos(PHI_C) # 计算正电子在 x 轴上的位置
+        PosY=RADIUS * np.sin(PHI_C) # 计算正电子在 y 轴上的位置
+        PosZ = np.zeros(num_accepted) # 生成长度为 num_accepted 的全 0 数组
+
+        # Four-momentum in
+        E_lab = GAMMA * (E + BETA * pz_prime) # 计算正电子在实验室参考系下的能量
+        px_lab=px_prime*np.cos(PHI_C)-py_prime*np.sin(PHI_C) 
+        py_lab=px_prime*np.sin(PHI_C)+py_prime*np.cos(PHI_C)
+        pz_lab=GAMMA*(pz_prime+BETA*E)
+
+
+
+        T=np.round(T,decimals=2)
+        E_lab=np.round(E_lab,decimals=2)
+        PosX=np.round(PosX,decimals=2)
+        PosY=np.round(PosY,decimals=2)
+        PosZ=np.round(PosZ,decimals=2)
+        px_lab=np.round(px_lab,decimals=2)
+        py_lab=np.round(py_lab,decimals=2)
+        pz_lab=np.round(pz_lab,decimals=2)
+
+        # Ensure all variables are at least 1D arrays so zip() works for single events
+        results.extend(zip(
+            np.atleast_1d(T),
+            np.atleast_1d(E_lab),
+            np.atleast_1d(PosX),
+            np.atleast_1d(PosY),
+            np.atleast_1d(PosZ),
+            np.atleast_1d(px_lab),
+            np.atleast_1d(py_lab),
+            np.atleast_1d(pz_lab)
+        ))
+    
+        # 7. 更新总数并打印进度
+        count += num_accepted
+        print(f"Generated {count}/{N} events", end='\r')    
     print("")
     return results
 
-detector_data = pd.DataFrame(generation(N_EVENTS), columns=['Time_us', 'Energy_MeV'])
+detector_data = pd.DataFrame(generation(N_EVENTS), columns=['Time_us', 'Energy_MeV',
+                                                            'PosX', 'PosY', 'PosZ', 'px_lab', 'py_lab', 'pz_lab'])
 print("Data generation completed. Saving to",FILE_NAME)
 detector_data.to_csv(FILE_NAME, index=False)
 print("Data saved.")

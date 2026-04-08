@@ -75,7 +75,17 @@ root_res = root_res[root_mask]
 root_bin = root_bin_centers[root_mask]
 
 
-
+print("--- Fit Results ---")
+print(f"N     = {root_fit_N:.8f} ± {root_err_N:.8f}")
+print(f"A     = {root_fit_A:.8f} ± {root_err_A:.8f}")
+print(f"omega = {root_fit_omega:.8f} ± {root_err_omega:.8f} rad/us")
+print(f"phi_0 = {root_fit_phi_0:.8f} ± {root_err_phi_0:.8f} rad")
+print("--------------------")
+pd.DataFrame({
+    'Parameter': ['N', 'A', 'omega (rad/us)', 'phi_0 (rad)'],
+    'Value': [root_fit_N, root_fit_A, root_fit_omega, root_fit_phi_0],
+    'Error': [root_err_N, root_err_A, root_err_omega, root_err_phi_0]
+})#.to_csv("fit_results.csv", index=False)
 
 
 
@@ -133,7 +143,17 @@ mask = (bin_centers >=  TIME_MIN) & (bin_centers <= TIME_MAX)
 res = res[mask]
 bin = bin_centers[mask]
 
-
+print("--- Fit Results ---")
+print(f"N     = {fit_N:.8f} ± {err_N:.8f}")
+print(f"A     = {fit_A:.8f} ± {err_A:.8f}")
+print(f"omega = {fit_omega:.8f} ± {err_omega:.8f} rad/us")
+print(f"phi_0 = {fit_phi_0:.8f} ± {err_phi_0:.8f} rad")
+print("--------------------")
+pd.DataFrame({
+    'Parameter': ['N', 'A', 'omega (rad/us)', 'phi_0 (rad)'],
+    'Value': [fit_N, fit_A, fit_omega, fit_phi_0],
+    'Error': [err_N, err_A, err_omega, err_phi_0]
+}).to_csv("fit_results.csv", index=False)
 
 
 
@@ -148,7 +168,7 @@ plt.ylabel('Residual', fontsize=12)
 #plt.yscale('log') # 可选对数坐标
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
-plt.savefig('plot/comp_residual.png', dpi=300)
+#plt.savefig('plot/comp_residual.png', dpi=300)
 plt.show()
 
 
@@ -253,5 +273,5 @@ ymax = max(
 plt.ylim(10, ymax * 1.2)
 
 plt.tight_layout()
-plt.savefig("plot/comp_fft.png", dpi=300, bbox_inches="tight")
+#plt.savefig("plot/comp_fft.png", dpi=300, bbox_inches="tight")
 plt.show()
