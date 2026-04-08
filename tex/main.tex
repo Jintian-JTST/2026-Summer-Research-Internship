@@ -3,6 +3,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{array}
+\usepackage{float}
 % 关于中文文献引用的格式参数设置请参考
 % https://github.com/hushidong/biblatex-gb7714-2015
 \usepackage[backend=biber,style=gb7714-2015]{biblatex}
@@ -205,16 +206,16 @@ E = \gamma (E' + \beta p' \cos\theta )
 \caption{图\ref{wiggle_line_fit_plot}的拟合结果展示。红色曲线为拟合结果，蓝色点为生成数据。}
 \end{figure}
 
-在相关文献中\cite{PhysRevD.103.072002,Chu2021Muon,PhysRevLett.131.161802}，常使用摆动图（wiggle plot）来展示超过能量阈值的正电子计数随时间的振荡行为。通过将时间对一个固定周期取模，可以将长时间范围内的数据折叠，从而更清晰地展示振荡结构。
+在相关文献中\cite{PhysRevD.103.072002,Chu2021Muon,PhysRevLett.131.161802}，常使用摆动图（wiggle plot）来展示超过能量阈值的正电子计数随时间的振荡行为。通过将时间对一个固定周期（本文选取 $100\, \mathrm{\mu s}$）取模，可以将长时间范围内的数据折叠，从而更清晰地展示振荡结构。
 
 \begin{figure}[htbp]
 \centering
-\begin{minipage}{0.49\textwidth}
+\begin{minipage}{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{wiggle_plot_time_mod_100.png}
 \end{minipage}
 \hfill
-\begin{minipage}{0.49\textwidth}
+\begin{minipage}{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{wiggle_plot_time_mod_100_with_fit.png}
 \end{minipage}
@@ -229,12 +230,12 @@ E = \gamma (E' + \beta p' \cos\theta )
 
 \begin{figure}[htbp]
 \centering
-\begin{minipage}{0.49\textwidth}
+\begin{minipage}{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{600wiggle_plot_time_mod_100.png}
 \end{minipage}
 \hfill
-\begin{minipage}{0.49\textwidth}
+\begin{minipage}{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{600wiggle_plot_time_mod_100_with_fit.png}
 \end{minipage}
@@ -246,8 +247,8 @@ E = \gamma (E' + \beta p' \cos\theta )
 \subsection{残差频谱绘制}
 
 拟合完成后，为了研究模型未能描述的时间结构，我构造了数据的绝对残差\cite{BOSTON2023} $r_i(t)=N^{\mathrm{data}}_i(t) - N^{\mathrm{fit}}_i(t)$，其中 $N^{\mathrm{data}}_i(t)$ 为实验数据在时间 $t$ 处的计数，$N^{\mathrm{fit}}_i(t)$ 为对应的拟合结果。注意到残差的幅度随时间逐渐减小，这主要由于事例数随时间呈指数衰减 $N(t)\sim e^{-t/\tau}$，其泊松涨落满足$\sigma_N \sim \sqrt{N}$，因此残差的典型幅度也随时间减小。
-
-\begin{figure}[htbp]
+\newpage
+\begin{figure}[h]
 \centering
 \includegraphics[width=\textwidth]{residual.png}
 \caption{模拟结果拟合后残差随时间的分布。}
@@ -256,7 +257,7 @@ E = \gamma (E' + \beta p' \cos\theta )
 
 随后我对残差进行快速傅里叶变换（FFT），以分析拟合模型未能描述的频率成分。
 
-\begin{figure}[htbp]
+\begin{figure}[h]
 \centering
 \includegraphics[width=\textwidth]{fft.png}
 \caption{模拟结果残差的快速傅里叶变换（FFT）频谱。橙色为残差频谱，蓝色为原始数据频谱。可以看到残差中主要振荡结构已被拟合函数去除。}
@@ -269,30 +270,31 @@ E = \gamma (E' + \beta p' \cos\theta )
 
 
 
-
-
+\clearpage
 \section{实验数据分析}
 
 和模拟数据一样，我对实验数据进行了拟合、残差计算和频谱绘制。
 
 \begin{figure}[htbp]
 \centering
-\begin{minipage}{0.49\textwidth}
+\begin{minipage}{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{wiggle_mod100.png}
 \end{minipage}
 \hfill
-\begin{minipage}{0.49\textwidth}
+\begin{minipage}{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{wiggle_mod100_with_fit.png}
 \end{minipage}
-\caption{实验数据选取$T\in[0, 660]\, \mathrm{\mu s}$，$\Delta t \approx 0.141\, \mathrm{\mu s}$在摆动图上的呈现。左图为原始数据，右图为加入拟合函数后的结果。}
+\caption{实验数据选取$T\in[10, 650]\, \mathrm{\mu s}$在摆动图上的呈现。左图为原始数据，右图为加入拟合函数后的结果。}
 \end{figure}
 
 
-\begin{figure}[htbp]
+实验数据的摆动图尽管在 $T$ 值较大的情况下（$T>600\, \mathrm{\mu s}$）保持了良好的连续性，并未像模拟数据那样出现了明显的分层，说明在单个时间分箱内满足能量阈值的正电子数仍然足够支持分析。
+
+\begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{residual_time_run6A.png}
+\includegraphics[width=\textwidth]{real_residual.png}
 \caption{真实实验数据拟合后残差随时间的分布。}
 \label{real_residual}
 \end{figure}
@@ -300,9 +302,9 @@ E = \gamma (E' + \beta p' \cos\theta )
 
 
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{111fft_residual_left_style.png}
+\includegraphics[width=\textwidth]{real_fft.png}
 \caption{真实实验数据残差的快速傅里叶变换（FFT）频谱。}
 \label{real_fft}
 \end{figure}
@@ -310,36 +312,37 @@ E = \gamma (E' + \beta p' \cos\theta )
 
 
 
-不难发现，实验数据的摆动图尽管在 $T$ 值较大的情况下保持了良好的连续性，并未像模拟数据那样出现了明显的分层，说明在单个时间分箱内满足能量阈值的正电子数仍然足够支持分析。我将在下一章节对模拟数据和实验数据的进行更加细致的分析。
 
 
-
+\newpage
 \section{模拟结果与实验数据的比较}
+
+为了确保模拟结果和实验数据可以保持一致，我统一选取了与实验数据相同的时间范围，即 $T\in[10, 650]\, \mathrm{\mu s}$ 进行比较。
 
 \subsection{残差分布比较}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{residual_time_compare.png}
-\caption{模拟结果与实验数据拟合后残差比较。橙色散点为模拟数据，蓝色散点为实验数据。}
+\includegraphics[width=\textwidth]{comp_residual.png}
+\caption{模拟结果与实验数据拟合后残差比较。蓝色散点为模拟数据，橙色散点为实验数据。}
 \label{23}
 \end{figure}
 
-实验数据中高于能量阈值的正电子总数目为 $2.13 \times 10^9$，为模拟样本量的 $42.6$ 倍，因此图\ref{real_wiggle_plot_run6A}中在 $T>600\, \mathrm{\mu s}$ 时依然可以呈现清晰的震荡结构。同理，在图\ref{23}中，模拟结果的散点在任意时刻的分布范围均广于实验数据。
+实验数据中高于能量阈值的正电子总数目为 $2.13 \times 10^9$，为模拟样本量的 $42.6$ 倍。因此在图\ref{23}中，模拟结果的散点在任意时刻的分布范围均广于实验数据。
 
 \subsection{残差频谱比较}
 
-对真实实验数据取残差后进行 FFT得到图\ref{real_fft}。将模拟结果图\ref{fake_fft}与真实结果图\ref{real_fft}进行比较，得到图\ref{compare_fft}。
+将模拟结果图\ref{fake_fft}与真实结果图\ref{real_fft}进行比较，得到图\ref{compare_fft}。
 
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{fft_residual_left_style_no_log.png}
-\caption{模拟结果与实验数据残差的快速傅里叶变换（FFT）频谱比较。蓝线为模拟数据，红线为实验数据。频谱中三个实验数据最高峰分别为 $f_1 =0.2286\, \mathrm{MHz}$， $f_2 = 0.4586\, \mathrm{MHz}$， $f_3 = 0.6872\, \mathrm{MHz}$。}
+\includegraphics[width=\textwidth]{comp_fft.png}
+\caption{模拟结果与实验数据残差的频谱比较。蓝线为模拟数据，橙线为实验数据。}
 \label{compare_fft}
 \end{figure}
 
-尽管我已经取了残差，但是在做 FFT 时，仍然得到了频率位于 $f_a$ （约0.23 MHz\cite{Chu2021Muon}）的最高峰，以及位于其二倍的 $2f_a$ 和三倍的 $3f_a$ 的两个次高峰。除去这三个高峰，频谱上并无出现明显特征。然而与之前的多轮实验不同的是，我没有从频谱上发现 $f_{CBO}$、$f_{CBO}\pm f_a$ \cite{PhysRevD.103.072002,PhysRevLett.131.161802,Chu2021Muon} 等其他特征。
+可以发现，无论是模拟数据还是实验数据，频谱中都没有明显的特征。这于之前的多轮实验不同，实验数据的频谱中有 $f_{CBO}$、$f_{CBO}\pm f_a$ \cite{PhysRevD.103.072002,PhysRevLett.131.161802,Chu2021Muon} 等其他特征，但是我并未观察到这一点。
 
 \section{总结}
 

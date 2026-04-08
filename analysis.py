@@ -121,13 +121,19 @@ plt.show()
 
 plt.figure(figsize=(12, 4))
 #plt.scatter(bin_centers, counts, s=0.25)
+
 fit_curve = wiggle_fit_function(bin_centers, *popt)
 res = (counts - fit_curve)   # 或 fit_curve - counts，符号只差正
-plt.scatter(bin_centers, res, s=0.25)
+mask = (bin_centers >= 0.1) & (bin_centers <= TIME_MAX)
+res = res[mask]
+bin = bin_centers[mask]
+
+
+plt.scatter(bin, res, s=0.25)
 
 #plt.title(f'Toy MC: Muon g-2 Wiggle Plot (E > {THRESHOLD/1000:.1f} GeV)\nAnomalous Precession $\\omega_a$ = {OMEGA_A} rad/us', fontsize=14)
 plt.xlabel(r'Time in Lab Frame ($\mu s$)', fontsize=12)
-plt.ylabel('Number of High-Energy Positrons ($N_e$)', fontsize=12)
+plt.ylabel('Residual', fontsize=12)
 #plt.yscale('log') # 可选对数坐标
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
