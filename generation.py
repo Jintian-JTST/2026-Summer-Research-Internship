@@ -46,7 +46,7 @@ def generation(N):
         if num_accepted > needed:
             T = T[:needed]
             x = x[:needed]
-            cos_thetac = cos_theta[:needed]
+            cos_theta = cos_theta[:needed]
             phi= phi[:needed]
             num_accepted = needed # 更新实际接受的数量
             

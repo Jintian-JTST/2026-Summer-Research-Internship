@@ -38,14 +38,14 @@ hist_data = {'Time_us': bin_centers, 'Counts': counts}
 pd.DataFrame(hist_data).to_csv("Counts.csv", index=False)
 
 # 拟合函数
-def wiggle_fit_function(t, N, A, omega, phi_0):
+def wiggle_fit_function(t, N, A, omega, phi_0, tau):
     """
     N: Normalization constant
     A: Asymmetry parameter
     omega: Anomalous precession frequency (自由参数)
     phi_0: Initial phase
     """
-    return N * np.exp(-t / TAU_LAB) * (1 + A * np.cos(omega * t - phi_0))
+    return N * np.exp(-t / tau) * (1 + A * np.cos(omega * t - phi_0))
 
 decay_factor = np.exp(-bin_centers[0] / TAU_LAB)
 
@@ -54,17 +54,18 @@ initial_N = counts[0] / decay_factor
 initial_A = 0.4  
 initial_omega = OMEGA_A  # 使用常数作为拟合的初始起点帮助收敛
 initial_phi_0 = 0.0 
+initial_tau=TAU_LAB
 
 popt, pcov = curve_fit(wiggle_fit_function,
                        bin_centers[counts>0],
                        counts[counts>0],
-                       p0=[initial_N, initial_A, initial_omega, initial_phi_0],
+                       p0=[initial_N, initial_A, initial_omega, initial_phi_0,initial_tau],
                        sigma=np.sqrt(counts[counts>0]),
                        absolute_sigma=True,maxfev=10000)
 
-fit_N, fit_A, fit_omega, fit_phi_0 = popt
+fit_N, fit_A, fit_omega, fit_phi_0, fit_tau = popt
 perr = np.sqrt(np.diag(pcov))
-err_N, err_A, err_omega, err_phi_0 = perr
+err_N, err_A, err_omega, err_phi_0, err_tau = perr
 
 
 print("--- Fit Results ---")
@@ -72,11 +73,12 @@ print(f"N     = {fit_N:.8f} ± {err_N:.8f}")
 print(f"A     = {fit_A:.8f} ± {err_A:.8f}")
 print(f"omega = {fit_omega:.8f} ± {err_omega:.8f} rad/us")
 print(f"phi_0 = {fit_phi_0:.8f} ± {err_phi_0:.8f} rad")
+print(f"tau = {fit_tau:.8f} ± {err_tau:.8f} rad")
 print("--------------------")
 pd.DataFrame({
-    'Parameter': ['N', 'A', 'omega (rad/us)', 'phi_0 (rad)'],
-    'Value': [fit_N, fit_A, fit_omega, fit_phi_0],
-    'Error': [err_N, err_A, err_omega, err_phi_0]
+    'Parameter': ['N', 'A', 'omega (rad/us)', 'phi_0 (rad)', 'tau (us)'],
+    'Value': [fit_N, fit_A, fit_omega, fit_phi_0, fit_tau],
+    'Error': [err_N, err_A, err_omega, err_phi_0, err_tau]
 }).to_csv("fit_results.csv", index=False)
 
 
