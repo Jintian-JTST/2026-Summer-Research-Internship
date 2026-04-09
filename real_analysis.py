@@ -5,43 +5,25 @@ from scipy.optimize import curve_fit
 from constants import *
 from scipy.fft import fft, fftfreq
 from scipy.signal import find_peaks
+import uproot
 
-file= FILE_NAME
+ROOT_FILE = "run6A.root"
+TIME_MIN = 10
+TIME_MAX = 650
+NUM=int((TIME_MAX-TIME_MIN)/TIME_WIN)
 
-# PARQUET VERSION
-toy_path = r"D:\Users\JTST\Desktop\Desktop\SI\2026-Summer-Research-Internship\Data.parquet"
-try:
-    data = pd.read_parquet(toy_path)
-except FileNotFoundError:
-    print(f"Error: {toy_path} not found.")
-    raise SystemExit(1)
+# 读取 ROOT 数据（这段打开root没有玩过，全盘ai实现）
+with uproot.open(ROOT_FILE) as file:
+    hist = file["et_spectrum"]
+    values = hist.values()
+    time_edges = hist.axis(0).edges()
+    energy_edges = hist.axis(1).edges()
 
-if "Time_us" not in data.columns or "Energy_MeV" not in data.columns:
-    raise KeyError("Data.parquet must contain columns: 'Time_us' and 'Energy_MeV'")
+bin_centers = 0.5 * (time_edges[:-1] + time_edges[1:])
 
-
-''' 
-# CSV VERSION
-toy_path = FILE_NAME
-try:
-    data = pd.read_csv(toy_path)
-except FileNotFoundError:
-    print(f"Error: {toy_path} not found.")
-    raise SystemExit(1)
-
-if "Time_us" not in data.columns or "Energy_MeV" not in data.columns:
-    raise KeyError("Data.parquet must contain columns: 'Time_us' and 'Energy_MeV'")
-'''
-
-
-# selection
-useful_data = data[data['Energy_MeV'] > THRESHOLD] 
-counts, bin_edges = np.histogram(useful_data['Time_us'], bins=NUM, range=(0, TIME_MAX))
-
-bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:]) 
-
-hist_data = {'Time_us': bin_centers, 'Counts': counts}
-pd.DataFrame(hist_data).to_csv("Counts.csv", index=False)
+energy_bin = np.searchsorted(energy_edges, THRESHOLD, side="left")
+counts = values[:, energy_bin:].sum(axis=1)
+# 后面和 anaylsis.py 一样
 
 
 
@@ -81,7 +63,7 @@ pd.DataFrame({
     'Parameter': ['N', 'A', 'omega (rad/us)', 'phi_0 (rad)', 'tau (us)'],
     'Value': [fit_N, fit_A, fit_omega, fit_phi_0, fit_tau],
     'Error': [err_N, err_A, err_omega, err_phi_0, err_tau]
-}).to_csv("fit_results.csv", index=False)
+}).to_csv("real_fit_results.csv", index=False)
 
 
 
@@ -97,15 +79,15 @@ plt.ylabel('Number of High-Energy Positrons ($N_e$)', fontsize=12)
 plt.yscale('log') # 可选对数坐标
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
-plt.xlim(-10, TIME_MAX+10)
-plt.savefig('plot/FAKE.png', dpi=300, bbox_inches='tight')
+plt.xlim(TIME_MIN-10, TIME_MAX+10)
+plt.savefig('plot/REAL.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 
 # FIT + ORIGINAL 
 plt.figure(figsize=(12, 4))
 plt.scatter(bin_centers, counts, s=0.25)
-plot_time = np.linspace(0, TIME_MAX, NUM)
+plot_time = np.linspace(TIME_MIN, TIME_MAX, NUM)
 fit_curve = wiggle_fit_function(plot_time, *popt)
 plt.plot(plot_time, fit_curve, 'r-', linewidth=0.5, label="Fit")
 plt.xlabel(r'Time in Lab Frame ($\mu s$)', fontsize=12)
@@ -113,8 +95,8 @@ plt.ylabel('Number of High-Energy Positrons ($N_e$)', fontsize=12)
 plt.yscale('log') # 可选对数坐标
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
-plt.xlim(-10, TIME_MAX+10)
-plt.savefig('plot/FAKE_FIT.png', dpi=300, bbox_inches='tight')
+plt.xlim(TIME_MIN-10, TIME_MAX+10)
+plt.savefig('plot/REAL_FIT.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 
@@ -127,7 +109,7 @@ plt.ylabel(f"Counts (E > {THRESHOLD} MeV)")
 plt.yscale("log")
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
-plt.savefig("plot/FAKE_WIGGLE.png", dpi=300, bbox_inches='tight')
+plt.savefig("plot/REAL_WIGGLE.png", dpi=300, bbox_inches='tight')
 plt.show()
 
 
@@ -141,7 +123,7 @@ plt.ylabel(f"Counts (E > {THRESHOLD} MeV)")
 plt.yscale("log")
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
-plt.savefig("plot/FAKE_WIGGLE_FIT.png", dpi=300, bbox_inches='tight')
+plt.savefig("plot/REAL_WIGGLE_FIT.png", dpi=300, bbox_inches='tight')
 plt.show()
 
 
@@ -149,7 +131,7 @@ plt.show()
 plt.figure(figsize=(12, 4))
 fit_curve = wiggle_fit_function(bin_centers, *popt)
 res = (counts - fit_curve) 
-mask = (bin_centers >= 0.1) & (bin_centers <= TIME_MAX)
+mask = (bin_centers >= TIME_MIN + 0.1) & (bin_centers <= TIME_MAX)
 res = res[mask]
 bin = bin_centers[mask]
 plt.scatter(bin, res, s=0.25)
@@ -157,16 +139,21 @@ plt.xlabel(r'Time in Lab Frame ($\mu s$)', fontsize=12)
 plt.ylabel('Residual', fontsize=12)
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
-plt.xlim(-10, TIME_MAX+10)
-plt.savefig('plot/FAKE_RES.png', dpi=300, bbox_inches='tight')
+plt.xlim(TIME_MIN-10, TIME_MAX+10)
+plt.savefig('plot/REAL_RES.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 
 # =========================
 # FFT
 # =========================
-dt = TIME_WIN
-N_bins = len(counts) 
+#多了这一段 mask 不加会报错
+x_fft = bin_centers[mask]
+counts_fft = counts[mask]
+res_fft = (counts_fft - wiggle_fit_function(x_fft, *popt))
+
+dt = np.mean(np.diff(x_fft))
+N_bins = len(counts)
 N_bins_res = len(res) 
 freq = fftfreq(N_bins, d=dt)[:N_bins // 2]
 
@@ -211,10 +198,11 @@ plt.plot(freq[mask_valid],res_plot[mask_valid],label="Residual FFT",lw=0.8,alpha
 plt.xlabel("Frequency (MHz)")
 plt.ylabel("Amplitude")
 plt.grid(True, which="both", ls="--", alpha=0.5)
+plt.legend()
 plt.yscale("log")
 plt.xlim(0.1, 3.0)
 ymax = max(np.max(raw_plot[mask_valid]), np.max(res_plot[mask_valid]))
 plt.ylim(10, ymax * 1.2)
 plt.tight_layout()
-plt.savefig("plot/FAKE_FFT.png", dpi=300, bbox_inches="tight")
+plt.savefig("plot/REAL_FFT.png", dpi=300, bbox_inches="tight")
 plt.show()
