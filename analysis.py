@@ -98,7 +98,7 @@ plt.yscale('log') # 可选对数坐标
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
 plt.xlim(-10, TIME_MAX+10)
-plt.savefig('plot/FAKE.png', dpi=300, bbox_inches='tight')
+plt.savefig('plot/FAKE'+str(TIME_MAX)+'.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 
@@ -114,7 +114,7 @@ plt.yscale('log') # 可选对数坐标
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
 plt.xlim(-10, TIME_MAX+10)
-plt.savefig('plot/FAKE_FIT.png', dpi=300, bbox_inches='tight')
+plt.savefig('plot/FAKE_FIT'+str(TIME_MAX)+'.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 
@@ -127,7 +127,7 @@ plt.ylabel(f"Counts (E > {THRESHOLD} MeV)")
 plt.yscale("log")
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
-plt.savefig("plot/FAKE_WIGGLE.png", dpi=300, bbox_inches='tight')
+plt.savefig("plot/FAKE_WIGGLE"+str(TIME_MAX)+".png", dpi=300, bbox_inches='tight')
 plt.show()
 
 
@@ -141,7 +141,7 @@ plt.ylabel(f"Counts (E > {THRESHOLD} MeV)")
 plt.yscale("log")
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
-plt.savefig("plot/FAKE_WIGGLE_FIT.png", dpi=300, bbox_inches='tight')
+plt.savefig("plot/FAKE_WIGGLE_FIT"+str(TIME_MAX)+".png", dpi=300, bbox_inches='tight')
 plt.show()
 
 
@@ -158,8 +158,13 @@ plt.ylabel('Residual', fontsize=12)
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
 plt.xlim(-10, TIME_MAX+10)
-plt.savefig('plot/FAKE_RES.png', dpi=300, bbox_inches='tight')
+plt.savefig('plot/FAKE_RES'+str(TIME_MAX)+'.png', dpi=300, bbox_inches='tight')
 plt.show()
+# 保存用于后续 FFT 的 masked residual
+pd.DataFrame({
+    "Time_us": bin,
+    "Residual": res,
+}).to_csv("residuals.csv", index=False)
 
 
 # =========================
@@ -216,5 +221,5 @@ plt.xlim(0.1, 3.0)
 ymax = max(np.max(raw_plot[mask_valid]), np.max(res_plot[mask_valid]))
 plt.ylim(10, ymax * 1.2)
 plt.tight_layout()
-plt.savefig("plot/FAKE_FFT.png", dpi=300, bbox_inches="tight")
+plt.savefig("plot/FAKE_FFT"+str(TIME_MAX)+".png", dpi=300, bbox_inches="tight")
 plt.show()

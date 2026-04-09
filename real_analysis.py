@@ -142,6 +142,11 @@ plt.tight_layout()
 plt.xlim(TIME_MIN-10, TIME_MAX+10)
 plt.savefig('plot/REAL_RES.png', dpi=300, bbox_inches='tight')
 plt.show()
+# 保存用于后续 FFT 的 masked residual
+pd.DataFrame({
+    "Time_us": bin,
+    "Residual": res,
+}).to_csv("real_residuals.csv", index=False)
 
 
 # =========================

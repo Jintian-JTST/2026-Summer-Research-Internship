@@ -1,9 +1,0 @@
-cd /mnt/d/Users/JTST/Desktop/Desktop/SI/2026-Summer-Research-Internship
-ls
-cp run6A.root ~/
-cd ~
-root
-
-TFile *f = TFile::Open("run6A.root");
-f->ls();
-TBrowser b;
