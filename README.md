@@ -1,83 +1,104 @@
-# 缪子反常磁矩实验的 Toy MC 程序模拟、摆动图构建与实验数据比较
+# 缪子 g-2 Toy MC 与实验数据比较
 
-本项目包含一套用于模拟缪子反常磁矩（Muon $g-2$）实验的 Toy Monte Carlo (MC) 脚本。该程序组模拟了极化缪子在储藏环中的衰变过程，生成正电子的运动学数据，通过能量阈值筛选构建 Wiggle Plot（高能正电子计数随时间的变化），并对模拟数据进行物理参数拟合以提取反常自旋进动角频率 $\omega_a$。
+本项目包含一套用于模拟缪子反常磁矩（Muon $g-2$）实验的 Toy Monte Carlo (MC) 脚本。该程序组模拟了极化缪子在储藏环中的衰变过程，生成正电子的运动学数据，通过能量阈值筛选构建 Wiggle Plot（高能正电子计数随时间的变化），且对模拟数据进行物理参数拟合以提取反常自旋进动角频率 $\omega_a$，并将 Toy 结果与共享的真实 ROOT 数据进行比较。更完整的方法、图像和讨论请见技术报告：`tex/main.pdf`。
 
-## 📦 依赖库 (Dependencies)
+## 仓库结构
 
-在运行本程序之前，请确保您的 Python 环境中安装了以下依赖库：
-
-```bash
-pip install numpy matplotlib pandas scipy
-```
-
-## 📂 项目结构与文件说明
-
-```
-2026-Summer-Research-Internship
+```text
+2026-Summer-Research-Internship/
 ├── .gitignore
 ├── LICENSE
 ├── README.md
+├── requirements.txt
 │
+├── main.py
 ├── constants.py
 ├── generation.py
 ├── analysis.py
+├── real_analysis.py
+├── together.py
 │
-├──plot/
-│  ├── wiggle_line_fit_plot.png
-│  ├── wiggle_line_fit_plot_with_fit.png
-│  ├── wiggle_plot_time_mod_100.png
-│  └── wiggle_plot_time_mod_100_with_fit.png
+├── Data.csv
+├── Counts.csv
+├── fit_results.csv
+├── real_fit_results.csv
+├── residuals.csv
+├── real_residuals.csv
+├── run6A.root
 │
-└──real data/
-   ├── plot/
-   ├── run6A.root
-   ├── real_analysis.py
-   └── together.py
-```
+├── plot/
+│   ├── FAKE*.png
+│   ├── REAL*.png
+│   ├── COMP_RES.png
+│   ├── COMP_FFT.png
+│   └── ...
+│
+└── tex/
+    ├── main.tex
+    ├── ref.bib
+    ├── main.pdf
+    └── ...
+````
 
+## 一行命令运行
 
-本项目由以下五个核心 Python 脚本组成，它们构成了一个完整的数据生成、处理到拟合的工作流：
-
-* **`constants.py`**
-    * **功能**：集中存储模拟和拟合所需的物理常数与超参数。
-    * **内容**：包含缪子/电子质量、洛伦兹因子 ($\gamma$)、实验室系下的寿命 ($\tau_{lab}$)、回旋频率 ($\omega_c$)、反常自旋进动角频率 ($\omega_a$)、模拟事件数 ($N = 5 \times 10^7$) 以及能量阈值等。
-
-* **`generation.py`**
-    * **功能**：核心 Toy MC 模拟器。
-    * **内容**：根据指数分布生成缪子衰变时间，并通过舍选法 (Rejection Sampling) 生成正电子的运动学参数，随后进行洛伦兹变换将其转换至实验室坐标系。
-    * **输出**：将探测器截获的时间和能量数据保存为 `Data.csv`。
-
-* **`analysis.py`**
-  * **功能**：模拟结果预处理、拟合与可视化。
-  * **内容**：读取生成的模拟数据，应用能量阈值筛选高能正电子（由阈值 $E > 1.7 \text{ GeV}$ 设定）。将筛选后的事件按时间装箱，并根据五参数公式进行曲线拟合，提取反常自旋进动频率 $\omega_a$。
-  * **输出**：直方图数据导出为 `Counts.csv` 供检查；拟合结果保存为 `fit_results.csv`；拟合参数和误差也会在控制台输出；散点图与拟合结果图保存至 `plot/` 目录下（包括 `wiggle_line_fit_plot.png`、`wiggle_line_fit_plot_with_fit.png` 等，模 100 微秒的折叠图，残差图，以及残差频谱图）。
-
-* **`real_analysis.py`**
-  * **功能**：实验数据预处理、拟合与可视化。
-  * **内容**：读取生成的模拟数据，应用能量阈值筛选高能正电子（由阈值 $E > 1.7 \text{ GeV}$ 设定）。将筛选后的事件根据五参数公式进行曲线拟合，提取反常自旋进动频率 $\omega_a$。
-  * **输出**：散点图与拟合结果图保存至 `real_data/plot/` 目录下，包括 `wiggle_line_fit_plot.png`、`wiggle_line_fit_plot_with_fit.png` 等，模 100 微秒的折叠图，残差图，以及残差频谱图。
-
-## 🚀 运行指南 (Workflow)
-
-一行命令完成整个模拟与分析流程：
 
 ```bash
-python generation.py && python analysis.py
+pip install -r requirements.txt
+python main.py
 ```
 
 
-**第一步：生成模拟数据**
-这将会运行一段时间（取决于您的 CPU），因为程序将生成 5000 万个事件的运动学数据。
-```bash
-python generation.py
-```
-*预期输出*：生成 `Data.csv` 文件。（注：请确保 `analysis.py` 中读取的文件名配置与此一致）
+## 各脚本功能
 
-**第二步：筛选数据与绘图**
-从生成的全量数据中提取高于能量阈值的高能正电子，生成时间分布直方图并进行曲线拟合。
-```bash
-python analysis.py
-```
-*预期输出*：生成 `Counts.csv` 和 `fit_results.csv` 并保存相关可视化图表到 `plot/` 目录下.
+* `main.py`
+  * 作为单命令运行的入口，依次调用其他脚本完成整个流程。
+
+* `constants.py`
+  * 统一存放项目中使用的物理常数与分析参数。
+
+* `generation.py`
+  * 用于生成 Toy MC 事件数据。主要内容包括：
+    1. 按指数分布生成缪子衰变时间；
+    2. 根据 Michel spectrum 与极化方向生成正电子运动学变量；
+    3. 进行实验室系变换，得到时间、能量、位置和动量信息；
+    4. 将事件级数据保存为表格文件。
+  * 输出： `Data.csv`
+
+* `analysis.py`
+  * 用于分析 Toy MC 数据。主要流程包括：
+    1. 读取 Toy 数据文件；
+    2. 根据能量阈值筛选高能正电子；
+    3. 构造时间谱直方图；
+    4. 使用五参数 wiggle 模型进行拟合；
+    5. 计算并保存 residual；
+    6. 对原始信号和 residual 做 FFT；
+    7. 生成对应图像。
+  * 输出：`Counts.csv`，`fit_results.csv`，`residuals.csv`，`residuals.csv`，`plot/FAKE*.png`，`plot/FAKE_FIT*.png`，`plot/FAKE_WIGGLE*.png`，`plot/FAKE_WIGGLE_FIT*.png`，`plot/FAKE_RES*.png`，`plot/FAKE_FFT*.png`
+
+
+* `real_analysis.py`
+  * 用于分析真实 ROOT 数据。和 `analysis.py` 类似，但针对 ROOT 文件格式进行数据读取和处理。
+
+
+* `together.py`
+  * 用于比较 Toy 数据和真实数据的 residual 与频谱。主要流程包括：
+    1. 读取 `residuals.csv`
+    2. 读取 `real_residuals.csv`
+    3. 绘制两组 residual 的对比图
+    4. 分别计算两组 residual 的 FFT
+    5. 绘制频谱对比图
+  * 输出：`plot/COMP_RES.png`，`plot/COMP_FFT.png`
+
+
+
+## 输出内容
+
+典型输出包括：
+
+* 拟合结果：`fit_results.csv`、`real_fit_results.csv`
+* residual 文件：`residuals.csv`、`real_residuals.csv`
+* `plot/` 目录下的图像
+* `tex/` 目录下的报告源码及 PDF
 
 
