@@ -12,7 +12,7 @@ TIME_MIN = 10
 TIME_MAX = 650
 NUM=int((TIME_MAX-TIME_MIN)/TIME_WIN)
 
-# 读取 ROOT 数据（这段打开root没有玩过，全盘ai实现）
+# 读取 ROOT 数据
 with uproot.open(ROOT_FILE) as file:
     hist = file["et_spectrum"]
     values = hist.values()

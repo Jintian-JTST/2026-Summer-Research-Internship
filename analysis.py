@@ -9,7 +9,7 @@ from scipy.signal import find_peaks
 file= FILE_NAME
 
 # PARQUET VERSION
-toy_path = r"D:\Users\JTST\Desktop\Desktop\SI\2026-Summer-Research-Internship\Data.parquet"
+toy_path = r"Data.parquet"
 try:
     data = pd.read_parquet(toy_path)
 except FileNotFoundError:
