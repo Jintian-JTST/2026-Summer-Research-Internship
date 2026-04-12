@@ -29,7 +29,7 @@ counts = values[:, energy_bin:].sum(axis=1)
 
 # 拟合函数
 def wiggle_fit_function(t, N, A, omega, phi_0, tau): # FIVE PARAMETERS FUNCTION
-    return N * np.exp(-t / tau) * (1 + A * np.cos(omega * t - phi_0))
+    return N * np.exp(-t / tau) * (1 + A * np.cos(omega * t + phi_0))
 
 decay_factor = np.exp(-bin_centers[0] / TAU_LAB)
 

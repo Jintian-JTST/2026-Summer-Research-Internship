@@ -47,7 +47,7 @@ pd.DataFrame(hist_data).to_csv("Counts.csv", index=False)
 
 # 拟合函数
 def wiggle_fit_function(t, N, A, omega, phi_0, tau): # FIVE PARAMETERS FUNCTION
-    return N * np.exp(-t / tau) * (1 + A * np.cos(omega * t - phi_0))
+    return N * np.exp(-t / tau) * (1 + A * np.cos(omega * t + phi_0))
 
 decay_factor = np.exp(-bin_centers[0] / TAU_LAB)
 
@@ -196,7 +196,7 @@ peaks, props = find_peaks(fft_valid, prominence=10)
 peak_heights = fft_valid[peaks]
 
 # 避免找到的峰不足3个时报错
-n_peaks = min(3, len(peaks))
+n_peaks = min(5, len(peaks))
 if n_peaks > 0:
     top_idx = np.argsort(peak_heights)[-n_peaks:][::-1]
     print("\n=== Top Peaks (Residual FFT) ===")
