@@ -7,18 +7,18 @@ from scipy.fft import fft, fftfreq
 from scipy.signal import find_peaks
 import uproot
 
-ROOT_FILE = "run6A.root"
-TIME_MIN = 10
-TIME_MAX = 650
+ROOT_FILE = "run2.root"
+TIME_MIN = 25
+TIME_MAX = 655
 NUM=int((TIME_MAX-TIME_MIN)/TIME_WIN)
 
 # 读取 ROOT 数据
 with uproot.open(ROOT_FILE) as file:
-    hist = file["et_spectrum"]
+    hist = file["ET_raw"]
     values = hist.values()
-    time_edges = hist.axis(0).edges()
+    time_edges = hist.axis(0).edges()/1000  # 转换为 μs
     energy_edges = hist.axis(1).edges()
-
+print('Total events in ROOT histogram:', values.sum())
 bin_centers = 0.5 * (time_edges[:-1] + time_edges[1:])
 
 energy_bin = np.searchsorted(energy_edges, THRESHOLD, side="left")
@@ -207,7 +207,8 @@ plt.legend()
 plt.yscale("log")
 plt.xlim(0.1, 3.0)
 ymax = max(np.max(raw_plot[mask_valid]), np.max(res_plot[mask_valid]))
-plt.ylim(10, ymax * 1.2)
+ymin = min(np.min(raw_plot[mask_valid]), np.min(res_plot[mask_valid]))
+plt.ylim(ymin * 0.8, ymax * 1.2)
 plt.tight_layout()
 plt.savefig("plot/REAL_FFT.png", dpi=300, bbox_inches="tight")
 plt.show()
