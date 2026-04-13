@@ -154,25 +154,24 @@ pd.DataFrame({
 # =========================
 # FFT
 # =========================
-#多了这一段 mask 不加会报错
+# 统一在同一个时间区间上做 FFT
 x_fft = bin_centers[mask]
 counts_fft = counts[mask]
-res_fft = (counts_fft - wiggle_fit_function(x_fft, *popt))
+fit_fft = wiggle_fit_function(x_fft, *popt)
+res = counts_fft - fit_fft
 
 dt = np.mean(np.diff(x_fft))
-N_bins = len(counts)
-N_bins_res = len(res) 
-freq = fftfreq(N_bins, d=dt)[:N_bins // 2]
+n = len(x_fft)
 
-# --- Raw FFT ---
-window_raw = np.hanning(N_bins)
-wiggle_raw_win = (counts - np.mean(counts)) * window_raw
-fft_raw = np.abs(fft(wiggle_raw_win)[:N_bins // 2])
+# 去均值 + 加窗
+window = np.hanning(n)
+raw_win = (counts_fft - np.mean(counts_fft)) * window
+res_win = (res - np.mean(res)) * window
 
-# --- Residual FFT ---
-window_res = np.hanning(N_bins_res)
-residual_win = (res - np.mean(res)) * window_res 
-fft_residual = np.abs(fft(residual_win)[:N_bins // 2])
+# 用 rfft / rfftfreq 更合适，只保留正频率
+freq = np.fft.rfftfreq(n, d=dt)
+fft_raw = np.abs(np.fft.rfft(raw_win))
+fft_residual = np.abs(np.fft.rfft(res_win))
 
 # =========================
 # 找峰 (RES)
@@ -184,8 +183,7 @@ fft_valid = fft_residual[mask_valid]
 peaks, props = find_peaks(fft_valid, prominence=10)
 peak_heights = fft_valid[peaks]
 
-# 避免找到的峰不足3个时报错
-n_peaks = min(3, len(peaks))
+n_peaks = min(4, len(peaks))
 if n_peaks > 0:
     top_idx = np.argsort(peak_heights)[-n_peaks:][::-1]
     print("\n=== Top Peaks (Residual FFT) ===")
@@ -200,8 +198,8 @@ else:
 plt.figure(figsize=(12, 4))
 raw_plot = np.clip(fft_raw, 1e-12, None)
 res_plot = np.clip(fft_residual, 1e-12, None)
-plt.plot(freq[mask_valid],raw_plot[mask_valid],label="Raw Signal FFT",lw=0.8,alpha=0.6)
-plt.plot(freq[mask_valid],res_plot[mask_valid],label="Residual FFT",lw=0.8,alpha=0.6)
+plt.plot(freq_valid, raw_plot[mask_valid], label="Raw Signal FFT", lw=0.8, alpha=0.6)
+plt.plot(freq_valid, res_plot[mask_valid], label="Residual FFT", lw=0.8, alpha=0.6)
 plt.xlabel("Frequency (MHz)")
 plt.ylabel("Amplitude")
 plt.grid(True, which="both", ls="--", alpha=0.5)
