@@ -75,7 +75,7 @@ python main.py
     5. 计算并保存 residual；
     6. 对原始信号和 residual 做 FFT；
     7. 生成对应图像。
-  * 输出：`Counts.csv`，`fit_results.csv`，`residuals.csv`，`residuals.csv`，`plot/FAKE*.png`，`plot/FAKE_FIT*.png`，`plot/FAKE_WIGGLE*.png`，`plot/FAKE_WIGGLE_FIT*.png`，`plot/FAKE_RES*.png`，`plot/FAKE_FFT*.png`
+  * 输出：`Counts.csv`，`fit_results.csv`，`residuals.csv`，`plot/FAKE*.png`，`plot/FAKE_FIT*.png`，`plot/FAKE_WIGGLE*.png`，`plot/FAKE_WIGGLE_FIT*.png`，`plot/FAKE_RES*.png`，`plot/FAKE_FFT*.png`
 
 
 * `real_analysis.py`
