@@ -2,6 +2,14 @@
 
 本项目包含一套用于模拟缪子反常磁矩（Muon $g-2$）实验的 Toy Monte Carlo (MC) 脚本。该程序组模拟了极化缪子在储藏环中的衰变过程，生成正电子的运动学数据，通过能量阈值筛选构建 Wiggle Plot（高能正电子计数随时间的变化），且对模拟数据进行物理参数拟合以提取反常自旋进动角频率 $\omega_a$，并将 Toy 结果与共享的真实 ROOT 数据进行比较。更完整的方法、图像和讨论请见技术报告：`tex/main.pdf`。
 
+## 一行命令运行
+
+
+```bash
+pip install -r requirements.txt
+python main.py
+```
+
 ## 仓库结构
 
 ```text
@@ -24,7 +32,7 @@
 ├── real_fit_results.csv
 ├── residuals.csv
 ├── real_residuals.csv
-├── run6A.root
+├── run2.root
 │
 ├── plot/
 │   ├── FAKE*.png
@@ -38,15 +46,8 @@
     ├── ref.bib
     ├── main.pdf
     └── ...
-````
-
-## 一行命令运行
-
-
-```bash
-pip install -r requirements.txt
-python main.py
 ```
+
 
 
 ## 各脚本功能

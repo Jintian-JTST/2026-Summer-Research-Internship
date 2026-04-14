@@ -8,6 +8,7 @@ from scipy.signal import find_peaks
 
 file= FILE_NAME
 
+'''
 # PARQUET VERSION
 toy_path = r"Data.parquet"
 try:
@@ -20,7 +21,7 @@ if "Time_us" not in data.columns or "Energy_MeV" not in data.columns:
     raise KeyError("Data.parquet must contain columns: 'Time_us' and 'Energy_MeV'")
 
 
-''' 
+#''' 
 # CSV VERSION
 toy_path = FILE_NAME
 try:
@@ -31,7 +32,7 @@ except FileNotFoundError:
 
 if "Time_us" not in data.columns or "Energy_MeV" not in data.columns:
     raise KeyError("Data.parquet must contain columns: 'Time_us' and 'Energy_MeV'")
-'''
+#'''
 
 
 # selection
