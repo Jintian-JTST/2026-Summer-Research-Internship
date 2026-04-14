@@ -19,7 +19,7 @@ P_MU = 0.95                     # 极化度
 
 THRESHOLD = 1700.0              # 设定能量阈值 1.7 GeV
 
-TIME_MAX = 600.0                # 绘图和拟合的时间范围上限 (us)
+TIME_MAX = 300.0                # 绘图和拟合的时间范围上限 (us)
 TIME_WIN = 149.2e-3                  # 时间箱宽度 (us)
 NUM=int(TIME_MAX/TIME_WIN)
 
