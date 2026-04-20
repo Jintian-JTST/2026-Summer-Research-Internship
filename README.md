@@ -32,7 +32,6 @@ python main.py
 ├── real_fit_results.csv
 ├── residuals.csv
 ├── real_residuals.csv
-├── run2.root
 │
 ├── plot/
 │   ├── FAKE*.png

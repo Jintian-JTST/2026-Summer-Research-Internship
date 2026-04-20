@@ -27,3 +27,5 @@ tex/*
 
 
 *.parquet
+
+run2.root
