@@ -76,14 +76,14 @@ def generation(N):
         pz_lab = p_vert_lab
 
 
-        T=np.round(T,decimals=2)
-        E_lab=np.round(E_lab,decimals=2)
-        PosX=np.round(PosX,decimals=2)
-        PosY=np.round(PosY,decimals=2)
-        PosZ=np.round(PosZ,decimals=2)
-        px_lab=np.round(px_lab,decimals=2)
-        py_lab=np.round(py_lab,decimals=2)
-        pz_lab=np.round(pz_lab,decimals=2)
+        T=np.round(T,decimals=DECIMALS)
+        E_lab=np.round(E_lab,decimals=DECIMALS)
+        PosX=np.round(PosX,decimals=DECIMALS)
+        PosY=np.round(PosY,decimals=DECIMALS)
+        PosZ=np.round(PosZ,decimals=DECIMALS)
+        px_lab=np.round(px_lab,decimals=DECIMALS)
+        py_lab=np.round(py_lab,decimals=DECIMALS)
+        pz_lab=np.round(pz_lab,decimals=DECIMALS)
 
         results.extend(zip(
             np.atleast_1d(T),
@@ -103,7 +103,8 @@ def generation(N):
 
 detector_data = pd.DataFrame(generation(N_EVENTS), columns=['Time_us', 'Energy_MeV','PosX', 'PosY', 'PosZ', 'px_lab', 'py_lab', 'pz_lab'])
 print("Data generation completed. Saving to",FILE_NAME)
-detector_data.to_csv(FILE_NAME, index=False)
+#detector_data.to_csv(FILE_NAME, index=False)
+detector_data.to_parquet("Data.parquet", index=False) 
 print("Data saved.")
 
 

@@ -8,7 +8,7 @@ from scipy.signal import find_peaks
 
 file= FILE_NAME
 
-'''
+#'''
 # PARQUET VERSION
 toy_path = r"Data.parquet"
 try:
@@ -21,7 +21,7 @@ if "Time_us" not in data.columns or "Energy_MeV" not in data.columns:
     raise KeyError("Data.parquet must contain columns: 'Time_us' and 'Energy_MeV'")
 
 
-#''' 
+''' 
 # CSV VERSION
 toy_path = FILE_NAME
 try:
@@ -37,9 +37,9 @@ if "Time_us" not in data.columns or "Energy_MeV" not in data.columns:
 
 # selection
 useful_data = data[data['Energy_MeV'] > THRESHOLD] 
-counts, bin_edges = np.histogram(useful_data['Time_us'], bins=NUM, range=(0, TIME_MAX))
-
-bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:]) 
+bin_edges = TIME_MIN + np.arange(N_BINS + 1) * TIME_WIN
+counts, bin_edges = np.histogram(useful_data["Time_us"], bins=bin_edges)
+bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
 
 hist_data = {'Time_us': bin_centers, 'Counts': counts}
 pd.DataFrame(hist_data).to_csv("Counts.csv", index=False)
@@ -106,7 +106,7 @@ plt.show()
 # FIT + ORIGINAL 
 plt.figure(figsize=(12, 4))
 plt.scatter(bin_centers, counts, s=0.25)
-plot_time = np.linspace(0, TIME_MAX, NUM)
+plot_time = np.linspace(0, TIME_MAX, N_BINS)
 fit_curve = wiggle_fit_function(plot_time, *popt)
 plt.plot(plot_time, fit_curve, 'r-', linewidth=0.5, label="Fit")
 plt.xlabel(r'Time in Lab Frame ($\mu s$)', fontsize=12)
@@ -174,7 +174,7 @@ pd.DataFrame({
 dt = TIME_WIN
 N_bins = len(counts) 
 N_bins_res = len(res) 
-freq = fftfreq(N_bins, d=dt)[:N_bins // 2]
+freq = fftfreq(N_bins_res, d=dt)[:N_bins // 2]
 
 # --- Raw FFT ---
 window_raw = np.hanning(N_bins)
